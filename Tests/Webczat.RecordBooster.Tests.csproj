@@ -20,8 +20,11 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="xunit.v3" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="All" ExcludeAssets="compile;runtime"/>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="../Src/Webczat.RecordBooster.csproj" />
+        <ProjectReference Include="../Src/Webczat.RecordBooster.csproj" />
     </ItemGroup>
 </Project>

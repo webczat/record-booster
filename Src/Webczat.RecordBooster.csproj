@@ -5,4 +5,9 @@
         <RootNamespace>Webczat.RecordBooster</RootNamespace>
         <Description>Record-booster - compiler refactorings for records</Description>
     </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" ExcludeAssets="compile;runtime" PrivateAssets="All"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" ExcludeAssets="Runtime" PrivateAssets="All"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" ExcludeAssets="Runtime" PrivateAssets="All"/>
+    </ItemGroup>
 </Project>
