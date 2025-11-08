@@ -1,0 +1,42 @@
+{
+  "name": "record-booster-env",
+  "image": "ubuntu",
+  "runArgs": [
+    "--cap-drop",
+    "all"
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "8.0"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "github.vscode-github-actions",
+        "ms-vscode.vscode-github-issue-notebooks",
+        "eamodio.gitlens",
+        "shd101wyy.markdown-preview-enhanced",
+        "DotJoshJohnson.xml",
+        "redhat.vscode-yaml",
+        "ms-dotnettools.vscodeintellicode-csharp"
+      ],
+      "settings": {
+        "csharp.debug.justMyCode": false,
+        "csharp.debug.console": "internalConsole",
+        "csharp.debug.symbolOptions.searchMicrosoftSymbolServer": true,
+        "csharp.debug.symbolOptions.searchNuGetOrgSymbolServer": true,
+        "dotnet.automaticallyCreateSolutionInWorkspace": false,
+        "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
+        "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution",
+        "dotnet.formatting.organizeImportsOnFormat": true,
+        "dotnet.navigation.navigateToSourceLinkAndEmbeddedSources": true,
+        "dotnet.symbolSearch.searchReferenceAssemblies": true,
+        "dotnet.testWindow.useTestingPlatformProtocol": true
+      }
+    }
+  }
+}

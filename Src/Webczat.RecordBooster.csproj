@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>Webczat.RecordBooster</RootNamespace>
+        <Description>Record-booster - compiler refactorings for records</Description>
+    </PropertyGroup>
+</Project>

@@ -1,0 +1,18 @@
+<Project>
+    <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
+    <PropertyGroup>
+        <ImplicitUsings>true</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <AnalysisMode>All</AnalysisMode>
+        <DisableRuntimeMarshalling>true</DisableRuntimeMarshalling>
+        <Deterministic>true</Deterministic>
+        <Version>0.1.0</Version>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="StyleCop.Analyzers" ExcludeAssets="compile" PrivateAssets="all"/>
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)\stylecop.json"/>
+    </ItemGroup>
+</Project>
