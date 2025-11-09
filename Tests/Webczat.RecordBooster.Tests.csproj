@@ -23,6 +23,8 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="All" ExcludeAssets="compile;runtime"/>
+        <PackageReference Include="Microsoft.NETCore.App.Ref" ExcludeAssets="All" GeneratePathProperty="true"/>
+        <Content Include="$(PkgMicrosoft_NETCore_App_Ref)\ref\$(TargetFramework)\**\*.dll" CopyToOutputDirectory="PreserveNewest" TargetPath="ref-assemblies\%(RecursiveDir)\%(Filename)%(Extension)"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Src/Webczat.RecordBooster.csproj" />
