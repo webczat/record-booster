@@ -43,12 +43,12 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
             return;
         }
 
-        RegisterToStringAndPrintMembers(context, root, recordSymbol, codeToRefactor, compilation);
+        RegisterToString(context, root, recordSymbol, codeToRefactor, compilation);
     }
 
-    private static void RegisterToStringAndPrintMembers(CodeRefactoringContext context, SyntaxNode root, ITypeSymbol recordSymbol, SyntaxNode originalRecord, Compilation compilation)
+    private static void RegisterToString(CodeRefactoringContext context, SyntaxNode root, ITypeSymbol recordSymbol, SyntaxNode originalRecord, Compilation compilation)
     {
-        // Fetch symbols needed for ToString and PrintMembers.
+        // Fetch symbols needed for ToString.
         var stringBuilderSymbol = compilation.GetTypeByMetadataName("System.Text.StringBuilder");
 
         if (stringBuilderSymbol is null)
@@ -60,13 +60,15 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         // Implicitly declared symbols are assumed not to exist.
         var toString = recordSymbol.GetMembers("ToString").SingleOrDefault(s => s is IMethodSymbol { Parameters: [], Arity: 0, IsImplicitlyDeclared: false });
 
-        if (toString is null)
+        if (toString is not null)
         {
-            context.RegisterRefactoring(CodeAction.Create(
-                "Generate default record \"ToString\"",
-                ct => GenerateToString(context.Document, root, originalRecord, recordSymbol, stringBuilderSymbol, ct),
-                ToStringKey));
+            return;
         }
+
+        context.RegisterRefactoring(CodeAction.Create(
+            "Generate default record \"ToString\"",
+            ct => GenerateToString(context.Document, root, originalRecord, recordSymbol, stringBuilderSymbol, ct),
+            ToStringKey));
     }
 
     private static async Task<Document> GenerateToString(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, ITypeSymbol stringBuilderSymbol, CancellationToken cancellationToken = default)
