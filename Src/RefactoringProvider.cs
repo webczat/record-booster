@@ -38,7 +38,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         var codeToRefactor = root.FindNode(context.Span, false, true);
         var symbol = semanticModel.GetDeclaredSymbol(codeToRefactor, context.CancellationToken);
 
-        if (symbol is not ITypeSymbol recordSymbol || !recordSymbol.IsRecord)
+        if (symbol is not ITypeSymbol { IsRecord: true } recordSymbol)
         {
             return;
         }
