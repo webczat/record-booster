@@ -23,6 +23,7 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="All" ExcludeAssets="compile;runtime"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Src/Webczat.RecordBooster.csproj" />
