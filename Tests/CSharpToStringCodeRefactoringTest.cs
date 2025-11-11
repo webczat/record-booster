@@ -11,5 +11,6 @@ public class CSharpToStringCodeRefactoringTest : CSharpCodeRefactoringTest<Refac
     public CSharpToStringCodeRefactoringTest()
     {
         CodeActionEquivalenceKey = RefactoringProvider.ToStringKey;
+        ReferenceAssemblies = ReferenceAssemblies.Net.Net80;
     }
 }
