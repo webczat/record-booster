@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webczat.RecordBooster", "Sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webczat.RecordBooster.Tests", "Tests\Webczat.RecordBooster.Tests.csproj", "{6AC50488-2C1A-4001-8C08-B210A9DD265F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webczat.RecordBooster.Sample", "Sample\Webczat.RecordBooster.Sample.csproj", "{DC708E6D-620E-4E89-8E36-35C518364C8D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,18 +41,6 @@ Global
 		{6AC50488-2C1A-4001-8C08-B210A9DD265F}.Release|x64.Build.0 = Release|Any CPU
 		{6AC50488-2C1A-4001-8C08-B210A9DD265F}.Release|x86.ActiveCfg = Release|Any CPU
 		{6AC50488-2C1A-4001-8C08-B210A9DD265F}.Release|x86.Build.0 = Release|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Debug|x64.Build.0 = Debug|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Debug|x86.Build.0 = Debug|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Release|x64.ActiveCfg = Release|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Release|x64.Build.0 = Release|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Release|x86.ActiveCfg = Release|Any CPU
-		{DC708E6D-620E-4E89-8E36-35C518364C8D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

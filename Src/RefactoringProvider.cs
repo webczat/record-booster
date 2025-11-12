@@ -15,7 +15,6 @@ namespace Webczat.RecordBooster;
 public sealed class RefactoringProvider : CodeRefactoringProvider
 {
     public const string ToStringKey = "ToString";
-    public const string PrintMembersKey = "PrintMembers";
 
     public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
     {
@@ -51,27 +50,17 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
             return;
         }
 
-        // See if appropriate symbols exist and prevent their generation if so.
-        // Implicitly declared symbols are assumed not to exist.
-        var toString = recordSymbol.GetMembers(ToStringKey).Any(s => s is IMethodSymbol { Parameters: [], Arity: 0, IsImplicitlyDeclared: false });
-
-        if (toString)
-        {
-            return;
-        }
-
         context.RegisterRefactoring(CodeAction.Create(
             "Generate default record \"ToString\"",
-            ct => GenerateToString(context.Document, root, originalRecord, recordSymbol, stringBuilderSymbol),
+            ct => GenerateToString(context.Document, root, originalRecord, stringBuilderSymbol),
             ToStringKey));
     }
 
-    private static async Task<Document> GenerateToString(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, ITypeSymbol stringBuilderSymbol)
+    private static async Task<Document> GenerateToString(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol stringBuilderSymbol)
     {
         var generator = SyntaxGenerator.GetGenerator(document);
 
         // Few often used names...
-        var recordExpression = generator.TypeExpression(recordSymbol);
         var stringBuilder = generator.TypeExpression(stringBuilderSymbol);
         var sb = generator.IdentifierName("sb");
 
@@ -83,14 +72,6 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
             modifiers: DeclarationModifiers.Override,
             statements: [
                 generator.LocalDeclarationStatement(stringBuilder, "sb", generator.ObjectCreationExpression(stringBuilder)),
-                generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), generator.NameOfExpression(recordExpression))),
-                generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), generator.LiteralExpression(" { ")))
-                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed),
-                generator.IfStatement(
-                    generator.InvocationExpression(generator.IdentifierName("PrintMembers"), [sb]),
-                    [generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), generator.LiteralExpression(' ')))])
-                    .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed),
-                generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), generator.LiteralExpression('}'))),
                 generator.ReturnStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "ToString"))),
             ])
             .WithAdditionalAnnotations(Simplifier.Annotation, Simplifier.AddImportsAnnotation, Formatter.Annotation);
