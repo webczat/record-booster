@@ -18,7 +18,8 @@
         "shd101wyy.markdown-preview-enhanced",
         "DotJoshJohnson.xml",
         "redhat.vscode-yaml",
-        "ms-dotnettools.vscodeintellicode-csharp"
+        "ms-dotnettools.vscodeintellicode-csharp",
+        "EditorConfig.EditorConfig"
       ],
       "settings": {
         "csharp.debug.justMyCode": false,

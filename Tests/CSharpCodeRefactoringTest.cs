@@ -13,7 +13,7 @@ public class CSharpCodeRefactoringTest : CSharpCodeRefactoringTest<RefactoringPr
 
     [*]
     charset = utf-8
-    end_of_line = lf
+    end_of_line = crlf
     indent_size = 4
     indent_style = space
     insert_final_newline = true
