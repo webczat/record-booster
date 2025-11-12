@@ -16,7 +16,7 @@ public class ToStringTests
     [InlineData("$$public enum X { }")]
     [InlineData("$$public struct X { }")]
     [InlineData("$$public delegate void X();")]
-    [InlineData("[|public interface X|] { }")]
+    [InlineData("$$public interface X { }")]
     public Task ToStringRefactoring_DoesNotAppear_NotRecord(string input) =>
     Verify.VerifyRefactoringAsync(input, input);
 
