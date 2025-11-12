@@ -1,8 +1,6 @@
 // This file is licensed under the MIT license.
 // See the "LICENSE" file for more details.
 
-using Microsoft.CodeAnalysis.Testing;
-
 using Xunit;
 
 using Verify = Microsoft.CodeAnalysis.Testing.CodeRefactoringVerifier<Webczat.RecordBooster.RefactoringProvider, Webczat.RecordBooster.CSharpToStringCodeRefactoringTest, Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
@@ -154,6 +152,53 @@ public class ToStringTests
         {
             public int Prop { get; }
 
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(nameof(Test));
+                sb.Append(" { ");
+
+                if (PrintMembers(sb))
+                {
+                    sb.Append(' ');
+                }
+
+                sb.Append('}');
+                return sb.ToString();
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Theory]
+    [InlineData("""
+    $$public record Test(int Prop)
+    {
+    }
+    """)]
+    [InlineData("""
+    public record Test(int Prop)
+    $${
+    }
+    """)]
+    [InlineData("""
+    public record Test(int Prop)
+    {
+    $$}
+    """)]
+    [InlineData("""
+    $$public record Test(int Prop);
+
+    """)]
+    public Task ToStringRefactoring_GeneratesToString_NoToStringAndRecordPositional(string input)
+    {
+        var output = """
+        using System.Text;
+
+        public record Test(int Prop)
+        {
             public override string ToString()
             {
                 StringBuilder sb = new StringBuilder();
