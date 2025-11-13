@@ -190,7 +190,6 @@ public class ToStringTests
     """)]
     [InlineData("""
     $$public record Test(int Prop);
-
     """)]
     public Task ToStringRefactoring_GeneratesToString_NoToStringAndRecordPositional(string input)
     {
@@ -199,6 +198,155 @@ public class ToStringTests
 
         public record Test(int Prop)
         {
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(nameof(Test));
+                sb.Append(" { ");
+
+                if (PrintMembers(sb))
+                {
+                    sb.Append(' ');
+                }
+
+                sb.Append('}');
+                return sb.ToString();
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task ToStringRefactoring_GeneratesReadonlyToString_RecordStructWithNoMembers()
+    {
+        var input = """
+        $$public record struct Test
+        {
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record struct Test
+        {
+            public override readonly string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(nameof(Test));
+                sb.Append(" { ");
+
+                if (PrintMembers(sb))
+                {
+                    sb.Append(' ');
+                }
+
+                sb.Append('}');
+                return sb.ToString();
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task ToStringRefactoring_GeneratesReadonlyToString_RecordStructWithReadonlyMembers()
+    {
+        var input = """
+        $$public record struct Test
+        {
+        public int TestProperty { get; }
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record struct Test
+        {
+        public int TestProperty { get; }
+
+            public override readonly string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(nameof(Test));
+                sb.Append(" { ");
+
+                if (PrintMembers(sb))
+                {
+                    sb.Append(' ');
+                }
+
+                sb.Append('}');
+                return sb.ToString();
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task ToStringRefactoring_GeneratesNonReadonlyToString_RecordStructWithNonReadonlyMembers()
+    {
+        var input = """
+        $$public record struct Test
+        {
+        public int TestProperty => 0;
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record struct Test
+        {
+        public int TestProperty => 0;
+
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(nameof(Test));
+                sb.Append(" { ");
+
+                if (PrintMembers(sb))
+                {
+                    sb.Append(' ');
+                }
+
+                sb.Append('}');
+                return sb.ToString();
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task ToStringRefactoring_GeneratesNonReadonlyToString_RecordStructWithNonReadonlyAndReadonlyMembers()
+    {
+        var input = """
+        $$public record struct Test
+        {
+        public int TestProperty => 0;
+
+        public int TestProperty2 { get; }
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record struct Test
+        {
+        public int TestProperty => 0;
+
+        public int TestProperty2 { get; }
+
             public override string ToString()
             {
                 StringBuilder sb = new StringBuilder();

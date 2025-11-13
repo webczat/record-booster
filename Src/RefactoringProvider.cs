@@ -53,9 +53,9 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
 
         // See if appropriate symbols exist and prevent their generation if so.
         // Implicitly declared symbols are assumed not to exist.
-        var toString = recordSymbol.GetMembers(ToStringKey).Any(s => s is IMethodSymbol { Parameters: [], Arity: 0, IsImplicitlyDeclared: false });
+        var hasToString = recordSymbol.GetMembers("ToString").Any(s => s is IMethodSymbol { Parameters: [], Arity: 0, IsImplicitlyDeclared: false });
 
-        if (toString)
+        if (hasToString)
         {
             return;
         }
@@ -68,6 +68,9 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
 
     private static async Task<Document> GenerateToString(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, ITypeSymbol stringBuilderSymbol)
     {
+        var isReadOnly = recordSymbol.IsValueType && recordSymbol.GetMembers("PrintMembers")
+        .Any(m => m is IMethodSymbol { Arity: 0, Parameters: { Length: 1 }, IsReadOnly: true } method && SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, stringBuilderSymbol));
+
         var generator = SyntaxGenerator.GetGenerator(document);
 
         // Few often used names...
@@ -76,11 +79,12 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         var sb = generator.IdentifierName("sb");
 
         // Generate the ToString method.
+        var modifiers = isReadOnly ? DeclarationModifiers.ReadOnly | DeclarationModifiers.Override : DeclarationModifiers.Override;
         var toString = generator.MethodDeclaration(
             "ToString",
             returnType: generator.TypeExpression(SpecialType.System_String),
             accessibility: Accessibility.Public,
-            modifiers: DeclarationModifiers.Override,
+            modifiers: modifiers,
             statements: [
                 generator.LocalDeclarationStatement(stringBuilder, "sb", generator.ObjectCreationExpression(stringBuilder)),
                 generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), generator.NameOfExpression(recordExpression))),
