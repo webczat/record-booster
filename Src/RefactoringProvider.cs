@@ -69,7 +69,8 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
     private static async Task<Document> GenerateToString(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, ITypeSymbol stringBuilderSymbol)
     {
         var isReadOnly = recordSymbol.IsValueType && recordSymbol.GetMembers("PrintMembers")
-        .Any(m => m is IMethodSymbol { Arity: 0, Parameters: { Length: 1 }, IsReadOnly: true } method && SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, stringBuilderSymbol));
+            .Any(m => m is IMethodSymbol { Arity: 0, Parameters.Length: 1, IsReadOnly: true } method
+            && SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, stringBuilderSymbol));
 
         var generator = SyntaxGenerator.GetGenerator(document);
 
