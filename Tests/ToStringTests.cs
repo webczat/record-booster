@@ -87,6 +87,12 @@ public class ToStringTests
 
     $$}
     """)]
+    [InlineData("""
+    [|public record Test
+    {
+
+    }|]
+    """)]
     public Task ToStringRefactoring_GeneratesToString_NoToStringAndNoMembers(string input)
     {
         var output = """
@@ -143,6 +149,13 @@ public class ToStringTests
 
     $$}
     """)]
+    [InlineData("""
+    [|public record Test
+    {
+        public int Prop { get; }
+
+    }|]
+    """)]
     public Task ToStringRefactoring_GeneratesToString_NoToStringAndMembersPresent(string input)
     {
         var output = """
@@ -190,6 +203,11 @@ public class ToStringTests
     """)]
     [InlineData("""
     $$public record Test(int Prop);
+    """)]
+    [InlineData("""
+    [|public record Test(int Prop)
+    {
+    }|]
     """)]
     public Task ToStringRefactoring_GeneratesToString_NoToStringAndRecordPositional(string input)
     {
