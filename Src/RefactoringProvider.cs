@@ -38,10 +38,10 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
             return;
         }
 
-        RegisterToString(context, root, recordSymbol, codeToRefactor, semanticModel.Compilation);
+        RegisterToStringAndPrintMembers(context, root, recordSymbol, codeToRefactor, semanticModel.Compilation);
     }
 
-    private static void RegisterToString(CodeRefactoringContext context, SyntaxNode root, ITypeSymbol recordSymbol, SyntaxNode originalRecord, Compilation compilation)
+    private static void RegisterToStringAndPrintMembers(CodeRefactoringContext context, SyntaxNode root, ITypeSymbol recordSymbol, SyntaxNode originalRecord, Compilation compilation)
     {
         // Fetch symbols needed for ToString.
         var stringBuilderSymbol = compilation.GetTypeByMetadataName("System.Text.StringBuilder");
@@ -54,23 +54,31 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         // See if appropriate symbols exist and prevent their generation if so.
         // Implicitly declared symbols are assumed not to exist.
         var hasToString = recordSymbol.GetMembers("ToString").Any(s => s is IMethodSymbol { Parameters: [], Arity: 0, IsImplicitlyDeclared: false });
+        var hasPrintMembers = recordSymbol.GetMembers("PrintMembers").Any(s => s is IMethodSymbol { Parameters: [{ Type: var type }], Arity: 0, IsImplicitlyDeclared: false }
+        && SymbolEqualityComparer.Default.Equals(type, stringBuilderSymbol));
 
-        if (hasToString)
+        if (!hasToString)
         {
-            return;
+            context.RegisterRefactoring(CodeAction.Create(
+                "Generate default record \"ToString\"",
+                ct => GenerateToString(context.Document, root, originalRecord, recordSymbol, stringBuilderSymbol),
+                ToStringKey));
         }
 
-        context.RegisterRefactoring(CodeAction.Create(
-            "Generate default record \"ToString\"",
-            ct => GenerateToString(context.Document, root, originalRecord, recordSymbol, stringBuilderSymbol),
-            ToStringKey));
+        if (!hasPrintMembers)
+        {
+            context.RegisterRefactoring(CodeAction.Create(
+                "Generate default record \"PrintMembers\"",
+                ct => GeneratePrintMembers(context.Document, root, originalRecord, recordSymbol, stringBuilderSymbol),
+                PrintMembersKey));
+        }
     }
 
     private static async Task<Document> GenerateToString(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, ITypeSymbol stringBuilderSymbol)
     {
         var isReadOnly = recordSymbol.IsValueType && recordSymbol.GetMembers("PrintMembers")
-            .Any(m => m is IMethodSymbol { Arity: 0, Parameters.Length: 1, IsReadOnly: true } method
-            && SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, stringBuilderSymbol));
+            .Any(m => m is IMethodSymbol { Arity: 0, Parameters: [{ Type: var type }], IsReadOnly: true } method
+            && SymbolEqualityComparer.Default.Equals(type, stringBuilderSymbol));
 
         var generator = SyntaxGenerator.GetGenerator(document);
 
@@ -105,5 +113,10 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         var newRoot = root.ReplaceNode(originalRecord, newRecord);
         var newDocument = document.WithSyntaxRoot(newRoot);
         return newDocument;
+    }
+
+    private static async Task<Document> GeneratePrintMembers(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, ITypeSymbol stringBuilderSymbol)
+    {
+        throw new NotImplementedException();
     }
 }
