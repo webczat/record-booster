@@ -59,6 +59,9 @@ public class ToStringTests
         public string $$x { get; }
     }
     """)]
+    [InlineData("""
+    public record Test($$int X, int Y, int Z);
+    """)]
     public Task ToStringRefactoring_DoesNotAppear_CursorInMembers(string input) =>
         Verify.VerifyRefactoringAsync(input, input);
 
