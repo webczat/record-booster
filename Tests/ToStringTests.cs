@@ -129,6 +129,7 @@ public class ToStringTests
     {
         public int Prop { get; }
 
+        public int Prop2 { get; }
     }
     """)]
     [InlineData("""
@@ -136,13 +137,15 @@ public class ToStringTests
     $${
         public int Prop { get; }
 
+        public int Prop2 { get; }
     }
     """)]
     [InlineData("""
     public record Test
     {
         public int Prop { get; }
-        $$
+    $$
+        public int Prop2 { get; }
     }
     """)]
     [InlineData("""
@@ -150,6 +153,7 @@ public class ToStringTests
     {
         public int Prop { get; }
 
+        public int Prop2 { get; }
     $$}
     """)]
     [InlineData("""
@@ -157,6 +161,7 @@ public class ToStringTests
     {
         public int Prop { get; }
 
+        public int Prop2 { get; }
     }|]
     """)]
     public Task ToStringRefactoring_GeneratesToString_NoToStringAndMembersPresent(string input)
@@ -167,6 +172,8 @@ public class ToStringTests
         public record Test
         {
             public int Prop { get; }
+
+            public int Prop2 { get; }
 
             public override string ToString()
             {

@@ -45,10 +45,10 @@ public class PrintMembersTests
     [InlineData("""
     public record Test
     {
-    public void X()
-    {
-        $$Console.WriteLine("test");
-    }
+        public void X()
+        {
+            $$System.Console.WriteLine("test");
+        }
     }
     """)]
     [InlineData("""
@@ -59,33 +59,33 @@ public class PrintMembersTests
 
     [Theory]
     [InlineData("""
-        $$public record Test
-        {
+    $$public record Test
+    {
 
-        }
+    }
     """)]
     [InlineData("""
-        public record Test
-        $${
-        }
+    public record Test
+    $${
+    }
     """)]
     [InlineData("""
-        public record Test
-        {
-        $$
-        }
+    public record Test
+    {
+    $$
+    }
     """)]
     [InlineData("""
-        public record Test
-        {
+    public record Test
+    {
 
-        $$}
+    $$}
     """)]
     [InlineData("""
-        [|public record Test
-        {
+    [|public record Test
+    {
 
-        }|]
+    }|]
     """)]
     public Task PrintMembersRefactoring_GeneratesMethodReturningFalse_NoMembers(string input)
     {
@@ -97,7 +97,8 @@ public class PrintMembersTests
             protected virtual bool PrintMembers(StringBuilder sb)
             {
                 return false;
-            }}
+            }
+        }
         """;
 
         return Verify.VerifyRefactoringAsync(input, output);
@@ -105,70 +106,70 @@ public class PrintMembersTests
 
     [Theory]
     [InlineData("""
-        $$public record Test
-        {
-            private int _field;
-            private readonly string _anotherField;
-            internal object InternalField;
-            protected double Property { get; init; }
-            public string AnotherProperty { set; }
-            public static int StaticField;
+    $$public record Test
+    {
+        private int _field;
+        private readonly string _anotherField;
+        internal object InternalField;
+        protected double Property { get; init; }
+        public string AnotherProperty { set  {} }
+        public static int StaticField;
 
-            public static int StaticProperty { get; init; }
-        }
-        """)]
+        public static int StaticProperty { get; }
+    }
+    """)]
     [InlineData("""
-        public record Test
-        $${
-            private int _field;
-            private readonly string _anotherField;
-            internal object InternalField;
-            protected double Property { get; init; }
-            public string AnotherProperty { set; }
-            public static int StaticField;
+    public record Test
+    $${
+        private int _field;
+        private readonly string _anotherField;
+        internal object InternalField;
+        protected double Property { get; init; }
+        public string AnotherProperty { set  {} }
+        public static int StaticField;
 
-            public static int StaticProperty { get; init; }
-        }
-        """)]
+        public static int StaticProperty { get; }
+    }
+    """)]
     [InlineData("""
-        public record Test
-        {
-            private int _field;
-            private readonly string _anotherField;
-            internal object InternalField;
-            protected double Property { get; init; }
-            public string AnotherProperty { set; }
-            public static int StaticField;
-            $$
-            public static int StaticProperty { get; init; }
-        }
-        """)]
+    public record Test
+    {
+        private int _field;
+        private readonly string _anotherField;
+        internal object InternalField;
+        protected double Property { get; init; }
+        public string AnotherProperty { set  {} }
+        public static int StaticField;
+    $$
+        public static int StaticProperty { get; }
+    }
+    """)]
     [InlineData("""
-        public record Test
-        {
-            private int _field;
-            private readonly string _anotherField;
-            internal object InternalField;
-            protected double Property { get; init; }
-            public string AnotherProperty { set; }
-            public static int StaticField;
+    public record Test
+    {
+        private int _field;
+        private readonly string _anotherField;
+        internal object InternalField;
+        protected double Property { get; init; }
+        public string AnotherProperty { set  {} }
+        public static int StaticField;
 
-            public static int StaticProperty { get; init; }
-        $$}
-        """)]
+        public static int StaticProperty { get; }
+    $$}
+    """)]
     [InlineData("""
-        [|public record Test
-        {
-            private int _field;
-            private readonly string _anotherField;
-            internal object InternalField;
-            protected double Property { get; init; }
-            public string AnotherProperty { set; }
-            public static int StaticField;
+    [|public record Test
+    {
+        private int _field;
+        private readonly string _anotherField;
+        internal object InternalField;
+        protected double Property { get; init; }
+        public string AnotherProperty { set  {} }
+        public static int StaticField;
 
-            public static int StaticProperty { get; init; }
-        }|]
-        """)]
+        public static int StaticProperty { get; }
+    }|]
+    """)]
     public Task PrintMembersRefactoring_GeneratesMethodReturningFalse_NoPrintableMembers(string input)
     {
         var output = """
@@ -180,10 +181,10 @@ public class PrintMembersTests
             private readonly string _anotherField;
             internal object InternalField;
             protected double Property { get; init; }
-            public string AnotherProperty { set; }
+            public string AnotherProperty { set  {} }
             public static int StaticField;
 
-            public static int StaticProperty { get; init; }
+            public static int StaticProperty { get; }
 
             protected virtual bool PrintMembers(StringBuilder sb)
             {
@@ -213,13 +214,13 @@ public class PrintMembersTests
     }
     """)]
     [InlineData("""
-    public record Test
-    {
-        public string Field;
+        public record Test
+        {
+            public string Field;
         $$
-        public string Prop { get; init; }
-    }
-    """)]
+            public string Prop { get; init; }
+        }
+        """)]
     [InlineData("""
     public record Test
     {
@@ -229,7 +230,7 @@ public class PrintMembersTests
     $$}
     """)]
     [InlineData("""
-    ["public record Test
+    [|public record Test
     {
         public string Field;
 
@@ -362,38 +363,38 @@ public class PrintMembersTests
 
     [Theory]
     [InlineData("""
-    $$public record Test(string Prop);
-    """)]
+        $$public record Test(string Prop);
+        """)]
     [InlineData("""
-    $$public record Test(string Prop)
-    {
+        $$public record Test(string Prop)
+        {
 
-    }
-    """)]
+        }
+        """)]
     [InlineData("""
-    public record Test(string Prop)
-    $${
+        public record Test(string Prop)
+        $${
 
-    }
-    """)]
+        }
+        """)]
     [InlineData("""
-    public record Test(string Prop)
-    {
-    $$
-    }
-    """)]
+        public record Test(string Prop)
+        {
+        $$
+        }
+        """)]
     [InlineData("""
-    public record Test(string Prop)
-    {
+        public record Test(string Prop)
+        {
 
-    $$}
-    """)]
+        $$}
+        """)]
     [InlineData("""
-    [|public record Test(string Prop)
-    {
+        [|public record Test(string Prop)
+        {
 
-    }|]
-    """)]
+        }|]
+        """)]
     public Task PrintMembersRefactoring_GeneratesMethodCorrectly_PositionalRecordWithParams(string input)
     {
         var output = """
@@ -508,12 +509,12 @@ public class PrintMembersTests
 
         $$public record Test : Base
         {
-            public static string StaticProperty { get; init; }
+            public static string StaticProperty { get; }
             public static int StaticField;
             private readonly int _field;
             private int AnotherField;
             internal string InternalProperty { get; init; }
-            public string UnreadableProperty { set; }
+            public string UnreadableProperty { set {} }
         }
         """;
 
@@ -526,12 +527,12 @@ public class PrintMembersTests
 
         public record Test : Base
         {
-            public static string StaticProperty { get; init; }
+            public static string StaticProperty { get; }
             public static int StaticField;
             private readonly int _field;
             private int AnotherField;
             internal string InternalProperty { get; init; }
-            public string UnreadableProperty { set; }
+            public string UnreadableProperty { set {} }
 
             protected override bool PrintMembers(StringBuilder sb) =>
                 base.PrintMembers(sb);
@@ -569,17 +570,17 @@ public class PrintMembersTests
 
             protected override bool PrintMembers(StringBuilder sb)
             {
-            if (base.PrintMembers(sb)
-            {
-                sb.Append(", ");
-            })
+                if (base.PrintMembers(sb)
+                {
+                    sb.Append(", ");
+                })
 
-            sb.Append("Field = ");
-            sb.Append(Field.ToString());
-            sb.Append(", ");
-            sb.Append("Property = ");
-            sb.Append(Property);
-            return true;
+                sb.Append("Field = ");
+                sb.Append(Field.ToString());
+                sb.Append(", ");
+                sb.Append("Property = ");
+                sb.Append(Property);
+                return true;
             }
         }
         """;
@@ -609,18 +610,17 @@ public class PrintMembersTests
 
         public record Test(string Property) : Base
         {
-
             protected override bool PrintMembers(StringBuilder sb)
             {
-            if (base.PrintMembers(sb)
-            {
-                sb.Append(", ");
-            })
+                if (base.PrintMembers(sb)
+                {
+                    sb.Append(", ");
+                })
 
-            sb.Append("Property = ");
-            sb.Append(Property);
-            return true;
-            }
+                sb.Append("Property = ");
+                sb.Append(Property);
+                return true;
+                }
         }
         """;
 
@@ -654,14 +654,14 @@ public class PrintMembersTests
 
             protected override bool PrintMembers(StringBuilder sb)
             {
-            if (base.PrintMembers(sb)
-            {
-                sb.Append(", ");
-            })
+                if (base.PrintMembers(sb)
+                {
+                    sb.Append(", ");
+                })
 
-            sb.Append("Property = ");
-            sb.Append(Property);
-            return true;
+                sb.Append("Property = ");
+                sb.Append(Property);
+                return true;
             }
         }
         """;
@@ -673,7 +673,7 @@ public class PrintMembersTests
     public Task PrintMembersRefactoring_GeneratesReadonlyMethod_RecordStructWithNoMembers()
     {
         var input = """
-        public record struct Test
+        $$public record struct Test
         {
         }
         """;
@@ -697,7 +697,7 @@ public class PrintMembersTests
     public Task PrintMembersRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyProperties()
     {
         var input = """
-        public record struct Test
+        $$public record struct Test
         {
             public string Property { get; init; }
         }
@@ -726,7 +726,7 @@ public class PrintMembersTests
     public Task PrintMembersRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyPropertiesAndNonReadonlyFields()
     {
         var input = """
-        public record struct Test
+        $$public record struct Test
         {
             public int Field;
             public string Property { get; init; }
@@ -760,7 +760,7 @@ public class PrintMembersTests
     public Task PrintMembersRefactoring_GeneratesNonReadonlyMethod_RecordStructWithNonReadonlyProperties()
     {
         var input = """
-        public record struct Test
+        $$public record struct Test
         {
             public string Property => "";
         }
@@ -789,7 +789,7 @@ public class PrintMembersTests
     public Task PrintMembersRefactoring_GeneratesNonReadonlyMethod_RecordStructWithMixedReadonlyAndNonReadonlyProperties()
     {
         var input = """
-        public record struct Test
+        $$public record struct Test
         {
             public string Property => "";
             public string Property2 { get; init; }
