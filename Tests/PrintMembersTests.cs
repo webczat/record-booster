@@ -39,7 +39,7 @@ public class PrintMembersTests
     [InlineData("""
     public record Test
     {
-    $$public int X;
+        $$public int X;
     }
     """)]
     [InlineData("""
