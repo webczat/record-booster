@@ -60,6 +60,18 @@ public class ToStringTests
     }
     """)]
     [InlineData("""
+    public record Test
+    {
+    $$    public string x { get; }
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+    [| |]   public string x { get; }
+    }
+    """)]
+    [InlineData("""
     public record Test($$int X, int Y, int Z);
     """)]
     public Task ToStringRefactoring_DoesNotAppear_CursorInMembers(string input) =>
@@ -70,33 +82,59 @@ public class ToStringTests
     $$public record Test
     {
 
+        
+    }
+    """)]
+    [InlineData("""
+    public record $$Test
+    {
+
+        
     }
     """)]
     [InlineData("""
     public record Test
     $${
 
+        
     }
     """)]
     [InlineData("""
     public record Test
     {
     $$
+        
     }
     """)]
     [InlineData("""
     public record Test
     {
 
+        $$
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        
     $$}
     """)]
     [InlineData("""
-    [|public record Test
+    public record Test
+    {
+    [|
+    |]    
+    }
+    """)]
+    [InlineData("""
+    public record Test
     {
 
-    }|]
+    [|    |]
+    }
     """)]
-    public Task ToStringRefactoring_GeneratesToString_NoToStringAndNoMembers(string input)
+    public Task ToStringRefactoring_GeneratesToString_CursorOnTypeAndNoMembers(string input)
     {
         var output = """
         using System.Text;
@@ -127,50 +165,215 @@ public class ToStringTests
     [InlineData("""
     $$public record Test
     {
+
+        
         public int Prop { get; }
 
-        public int Prop2 { get; }
+    }
+    """)]
+    [InlineData("""
+    public record $$Test
+    {
+
+        
+        public int Prop { get; }
+
     }
     """)]
     [InlineData("""
     public record Test
     $${
+
+        
         public int Prop { get; }
 
-        public int Prop2 { get; }
     }
     """)]
     [InlineData("""
     public record Test
     {
+    $$
+        
+        public int Prop { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        $$
+        public int Prop { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+    [|    |]
+        public int Prop { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+    [|
+    |]    
+        public int Prop { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        
         public int Prop { get; }
     $$
-        public int Prop2 { get; }
     }
     """)]
-    [InlineData("""
-    public record Test
-    {
-        public int Prop { get; }
-
-        public int Prop2 { get; }
-    $$}
-    """)]
-    [InlineData("""
-    [|public record Test
-    {
-        public int Prop { get; }
-
-        public int Prop2 { get; }
-    }|]
-    """)]
-    public Task ToStringRefactoring_GeneratesToString_NoToStringAndMembersPresent(string input)
+    public Task ToStringRefactoring_GeneratesToString_CursorOnTypeAndOneMemberPresent(string input)
     {
         var output = """
         using System.Text;
 
         public record Test
         {
+
+            
+            public int Prop { get; }
+
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(nameof(Test));
+                sb.Append(" { ");
+
+                if (PrintMembers(sb))
+                {
+                    sb.Append(' ');
+                }
+
+                sb.Append('}');
+                return sb.ToString();
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Theory]
+    [InlineData("""
+    $$public record Test
+    {
+
+        
+        public int Prop { get; }
+
+        public int Prop2 { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record $$Test
+    {
+
+        
+        public int Prop { get; }
+
+        public int Prop2 { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    $${
+
+        
+        public int Prop { get; }
+
+        public int Prop2 { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+    $$
+        
+        public int Prop { get; }
+
+        public int Prop2 { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        $$
+        public int Prop { get; }
+
+        public int Prop2 { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+    [|    |]
+        public int Prop { get; }
+
+        public int Prop2 { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+    [|
+    |]    
+        public int Prop { get; }
+
+        public int Prop2 { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        
+        public int Prop { get; }
+    $$
+        public int Prop2 { get; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        
+        public int Prop { get; }
+
+        public int Prop2 { get; }
+    $$
+    }
+    """)]
+    public Task ToStringRefactoring_GeneratesToString_CursorOnTypeAndTwoMembersPresent(string input)
+    {
+        var output = """
+        using System.Text;
+
+        public record Test
+        {
+
+            
             public int Prop { get; }
 
             public int Prop2 { get; }
@@ -195,32 +398,98 @@ public class ToStringTests
         return Verify.VerifyRefactoringAsync(input, output);
     }
 
-    [Theory]
-    [InlineData("""
-    $$public record Test(int Prop)
+    [Fact]
+    public Task ToStringRefactoring_GeneratesToStringInInnerType_RecordsNestedAndCursorOnNestedType()
     {
+        var input = """
+        public record Outer
+        {
+        
+            $$public record Inner
+            {
+            }
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record Outer
+        {
+        
+            $$public record Inner
+            {
+                public override string ToString()
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append(nameof(Inner));
+                    sb.Append(" { ");
+
+                    if (PrintMembers(sb))
+                    {
+                        sb.Append(' ');
+                    }
+
+                    sb.Append('}');
+                    return sb.ToString();
+                }
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
     }
-    """)]
-    [InlineData("""
-    public record Test(int Prop)
-    $${
+
+    [Fact]
+    public Task ToStringRefactoring_GeneratesToStringInOuterType_RecordsNestedAndCursorBeforeNestedType()
+    {
+        var input = """
+        public record Outer
+        {
+        $$
+            public record Inner
+            {
+            }
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record Outer
+        {
+        
+            public record Inner
+            {
+            }
+
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(nameof(Outer));
+                sb.Append(" { ");
+
+                if (PrintMembers(sb))
+                {
+                    sb.Append(' ');
+                }
+
+                sb.Append('}');
+                return sb.ToString();
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
     }
-    """)]
-    [InlineData("""
-    public record Test(int Prop)
+
+    [Fact]
+    public Task ToStringRefactoring_GeneratesToString_NoToStringAndRecordPositional()
     {
-    $$}
-    """)]
-    [InlineData("""
-    $$public record Test(int Prop);
-    """)]
-    [InlineData("""
-    [|public record Test(int Prop)
-    {
-    }|]
-    """)]
-    public Task ToStringRefactoring_GeneratesToString_NoToStringAndRecordPositional(string input)
-    {
+        var input = """
+                $$public record Test(int Prop);
+        """;
+
         var output = """
         using System.Text;
 

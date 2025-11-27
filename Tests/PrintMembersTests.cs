@@ -45,6 +45,18 @@ public class PrintMembersTests
     [InlineData("""
     public record Test
     {
+    $$    public int X;
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+    [| |]   public int X;
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
         public void X()
         {
             $$System.Console.WriteLine("test");
@@ -62,32 +74,59 @@ public class PrintMembersTests
     $$public record Test
     {
 
+        
+    }
+    """)]
+    [InlineData("""
+    public record $$Test
+    {
+
+        
     }
     """)]
     [InlineData("""
     public record Test
     $${
+
+        
     }
     """)]
     [InlineData("""
     public record Test
     {
     $$
+        
     }
     """)]
     [InlineData("""
     public record Test
     {
 
+        $$
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        
     $$}
     """)]
     [InlineData("""
-    [|public record Test
+    public record Test
+    {
+    [|
+    |]    
+    }
+    """)]
+    [InlineData("""
+    public record Test
     {
 
-    }|]
+    [|    |]
+    }
     """)]
-    public Task PrintMembersRefactoring_GeneratesMethodReturningFalse_NoMembers(string input)
+    public Task PrintMembersRefactoring_GeneratesMethodReturningFalse_CursorOnTypeAndNoMembers(string input)
     {
         var output = """
         using System.Text;
@@ -104,74 +143,22 @@ public class PrintMembersTests
         return Verify.VerifyRefactoringAsync(input, output);
     }
 
-    [Theory]
-    [InlineData("""
-    $$public record Test
+    [Fact]
+    public Task PrintMembersRefactoring_GeneratesMethodReturningFalse_NoPrintableMembers()
     {
-        private int _field;
-        private readonly string _anotherField;
-        internal object InternalField;
-        protected double Property { get; init; }
-        public string AnotherProperty { set  {} }
-        public static int StaticField;
+        var input = """
+        $$public record Test
+        {
+            private int _field;
+            private readonly string _anotherField;
+            internal object InternalField;
+            protected double Property { get; init; }
+            public string AnotherProperty { set  {} }
+            public static int StaticField;
+            public static int StaticProperty { get; }
+        }
+        """;
 
-        public static int StaticProperty { get; }
-    }
-    """)]
-    [InlineData("""
-    public record Test
-    $${
-        private int _field;
-        private readonly string _anotherField;
-        internal object InternalField;
-        protected double Property { get; init; }
-        public string AnotherProperty { set  {} }
-        public static int StaticField;
-
-        public static int StaticProperty { get; }
-    }
-    """)]
-    [InlineData("""
-    public record Test
-    {
-        private int _field;
-        private readonly string _anotherField;
-        internal object InternalField;
-        protected double Property { get; init; }
-        public string AnotherProperty { set  {} }
-        public static int StaticField;
-    $$
-        public static int StaticProperty { get; }
-    }
-    """)]
-    [InlineData("""
-    public record Test
-    {
-        private int _field;
-        private readonly string _anotherField;
-        internal object InternalField;
-        protected double Property { get; init; }
-        public string AnotherProperty { set  {} }
-        public static int StaticField;
-
-        public static int StaticProperty { get; }
-    $$}
-    """)]
-    [InlineData("""
-    [|public record Test
-    {
-        private int _field;
-        private readonly string _anotherField;
-        internal object InternalField;
-        protected double Property { get; init; }
-        public string AnotherProperty { set  {} }
-        public static int StaticField;
-
-        public static int StaticProperty { get; }
-    }|]
-    """)]
-    public Task PrintMembersRefactoring_GeneratesMethodReturningFalse_NoPrintableMembers(string input)
-    {
         var output = """
         using System.Text;
 
@@ -183,7 +170,6 @@ public class PrintMembersTests
             protected double Property { get; init; }
             public string AnotherProperty { set  {} }
             public static int StaticField;
-
             public static int StaticProperty { get; }
 
             protected virtual bool PrintMembers(StringBuilder sb)
@@ -200,52 +186,310 @@ public class PrintMembersTests
     [InlineData("""
     $$public record Test
     {
-        public string Field;
 
+        
         public string Prop { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record $$Test
+    {
+
+        
+        public string Prop { get; init; }
+
     }
     """)]
     [InlineData("""
     public record Test
     $${
-        public string Field;
 
+        
         public string Prop { get; init; }
+
     }
     """)]
     [InlineData("""
-        public record Test
-        {
-            public string Field;
-        $$
-            public string Prop { get; init; }
-        }
-        """)]
+    public record Test
+    {
+    $$
+        
+        public string Prop { get; init; }
+
+    }
+    """)]
     [InlineData("""
     public record Test
     {
-        public string Field;
 
+        $$
         public string Prop { get; init; }
-    $$}
+
+    }
     """)]
     [InlineData("""
-    [|public record Test
+    public record Test
     {
-        public string Field;
 
+    [|    |]
         public string Prop { get; init; }
-    }|]
+
+    }
     """)]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_PrintableMembersPresent(string input)
+    [InlineData("""
+    public record Test
+    {
+    [|
+    |]    
+        public string Prop { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        
+        public string Prop { get; init; }
+    $$
+    }
+    """)]
+    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_CursorOnTypeAndSinglePrintableMember(string input)
     {
         var output = """
         using System.Text;
 
         public record Test
         {
-            public string Field;
 
+            
+            public string Prop { get; init; }
+
+            protected virtual bool PrintMembers(StringBuilder sb)
+            {
+                System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+                sb.Append("Prop = );
+                sb.Append(Prop);
+                return true;
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Theory]
+    [InlineData("""
+    $$public record Test
+    {
+
+        
+        public string Prop { get; init; }
+
+        public string Prop2 { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record $$Test
+    {
+
+        
+        public string Prop { get; init; }
+
+        public string Prop2 { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    $${
+
+        
+        public string Prop { get; init; }
+
+        public string Prop2 { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+    $$
+        
+        public string Prop { get; init; }
+
+        public string Prop2 { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        $$
+        public string Prop { get; init; }
+
+        public string Prop2 { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+    [|    |]
+        public string Prop { get; init; }
+
+        public string Prop2 { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+    [|
+    |]    
+        public string Prop { get; init; }
+
+        public string Prop2 { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        
+        public string Prop { get; init; }
+    $$
+    public string Prop2 { get; init; }
+
+    }
+    """)]
+    [InlineData("""
+    public record Test
+    {
+
+        
+        public string Prop { get; init; }
+
+    public string Prop2 { get; init; }
+    $$
+    }
+    """)]
+    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_CursorOnTypeAndTwoPrintableMembers(string input)
+    {
+        var output = """
+        using System.Text;
+
+        public record Test
+        {
+
+            
+            public string Prop { get; init; }
+
+            public string Prop2 { get; init; }
+
+            protected virtual bool PrintMembers(StringBuilder sb)
+            {
+                System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+                sb.Append("Prop = );
+                sb.Append(Prop);
+                sb.Append(", ");
+                sb.Append("Prop2 = ");
+                sb.Append(Prop2);
+                return true;
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task PrintMembersRefactoring_GeneratesMethodInInnerType_RecordsNestedAndCursorOnNestedType()
+    {
+        var input = """
+        public record Outer
+        {
+        
+            $$public record Inner
+            {
+            }
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record Outer
+        {
+        
+            $$public record Inner
+            {
+                protected virtual bool PrintMembers(StringBuilder sb)
+                {
+                    return false;
+                }
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task PrintMembersRefactoring_GeneratesMethodInOuterType_RecordsNestedAndCursorBeforeNestedType()
+    {
+        var input = """
+        public record Outer
+        {
+        $$
+            public record Inner
+            {
+            }
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record Outer
+        {
+        
+            public record Inner
+            {
+            }
+
+            protected virtual bool PrintMembers(StringBuilder sb)
+            {
+                return false;
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_BothPrintableFieldsAndProperties()
+    {
+        var input = """
+        $$public record Test
+        {
+            public string Field;
+            public string Prop { get; init; }
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record Test
+        {
+            public string Field;
             public string Prop { get; init; }
 
             protected virtual bool PrintMembers(StringBuilder sb)
@@ -297,36 +541,6 @@ public class PrintMembersTests
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_SinglePrintableMember()
-    {
-        var input = """
-        $$public record Test
-        {
-            public string Prop { get; init; }
-        }
-        """;
-
-        var output = """
-        using System.Text;
-
-        public record Test
-        {
-            public string Prop { get; init; }
-
-            protected virtual bool PrintMembers(StringBuilder sb)
-            {
-                System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-                sb.Append("Prop = );
-                sb.Append(Prop);
-                return true;
-            }
-        }
-        """;
-
-        return Verify.VerifyRefactoringAsync(input, output);
-    }
-
-    [Fact]
     public Task PrintMembersRefactoring_GeneratesMethodUsingToString_ValueTypeMembers()
     {
         var input = """
@@ -361,42 +575,13 @@ public class PrintMembersTests
         return Verify.VerifyRefactoringAsync(input, output);
     }
 
-    [Theory]
-    [InlineData("""
-        $$public record Test(string Prop);
-        """)]
-    [InlineData("""
-        $$public record Test(string Prop)
-        {
-
-        }
-        """)]
-    [InlineData("""
-        public record Test(string Prop)
-        $${
-
-        }
-        """)]
-    [InlineData("""
-        public record Test(string Prop)
-        {
-        $$
-        }
-        """)]
-    [InlineData("""
-        public record Test(string Prop)
-        {
-
-        $$}
-        """)]
-    [InlineData("""
-        [|public record Test(string Prop)
-        {
-
-        }|]
-        """)]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_PositionalRecordWithParams(string input)
+    [Fact]
+    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_PositionalRecordWithParams()
     {
+        var input = """
+        $$public record Test(string Prop);
+        """;
+
         var output = """
         using System.Text;
 
