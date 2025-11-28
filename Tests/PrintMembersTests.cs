@@ -364,7 +364,7 @@ public class PrintMembersTests
         
         public string Prop { get; init; }
     $$
-    public string Prop2 { get; init; }
+        public string Prop2 { get; init; }
 
     }
     """)]
@@ -375,7 +375,7 @@ public class PrintMembersTests
         
         public string Prop { get; init; }
 
-    public string Prop2 { get; init; }
+        public string Prop2 { get; init; }
     $$
     }
     """)]
@@ -494,7 +494,7 @@ public class PrintMembersTests
 
             protected virtual bool PrintMembers(StringBuilder sb)
             {
-            System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+                System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
                 sb.Append("Field = ");
                 sb.Append(Field);
                 sb.Append(", ");
@@ -530,7 +530,7 @@ public class PrintMembersTests
             protected virtual bool PrintMembers(StringBuilder sb)
             {
                 System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-                sb.Append("Prop  = ");
+                sb.Append("Prop = ");
                 sb.Append(Prop);
                 return true;
             }
@@ -561,7 +561,7 @@ public class PrintMembersTests
 
             protected virtual bool PrintMembers(StringBuilder sb)
             {
-            System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+                System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
                 sb.Append("Field = ");
                 sb.Append(Field.ToString());
                 sb.Append(", ");
@@ -590,7 +590,7 @@ public class PrintMembersTests
             protected virtual bool PrintMembers(StringBuilder sb)
             {
                 System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-                sb.Append("Prop  = ");
+                sb.Append("Prop = ");
                 sb.Append(Prop);
                 return true;
             }
@@ -604,9 +604,9 @@ public class PrintMembersTests
     public Task PrintMembersRefactoring_GeneratesMethodCorrectly_PositionalRecordWithParamsAndExplicitProperty()
     {
         var input = """
-        $$public record Test(string prop)
+        $$public record Test(string Prop)
         {
-            public string Prop => prop;
+            public string Prop => Prop;
         }
         """;
 
@@ -620,7 +620,7 @@ public class PrintMembersTests
             protected virtual bool PrintMembers(StringBuilder sb)
             {
                 System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-                sb.Append("Prop  = ");
+                sb.Append("Prop = ");
                 sb.Append(Prop);
                 return true;
             }
@@ -820,9 +820,9 @@ public class PrintMembersTests
         {
         }
 
-        $$public record Test(string property) : Base
+        $$public record Test(string Property) : Base
         {
-            public string Property => property;
+            public string Property => Property;
         }
         """;
 
@@ -994,7 +994,7 @@ public class PrintMembersTests
                 sb.Append("Property = ");
                 sb.Append(Property);
                 sb.Append(", ");
-                sb.Append("Property2  = ");
+                sb.Append("Property2 = ");
                 sb.Append(Property2);
                 return true;
             }
