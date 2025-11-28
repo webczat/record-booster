@@ -613,9 +613,9 @@ public class PrintMembersTests
         var output = """
         using System.Text;
 
-        public record Test(string prop)
+        public record Test(string Prop)
         {
-            public string Prop => prop;
+            public string Prop => Prop;
 
             protected virtual bool PrintMembers(StringBuilder sb)
             {
@@ -677,8 +677,11 @@ public class PrintMembersTests
 
         public record Test : Base
         {
-            protected override bool PrintMembers(StringBuilder sb) =>
-                base.PrintMembers(sb);
+            protected override bool PrintMembers(StringBuilder sb)
+            {
+                return base.PrintMembers(sb);
+            }
+        }
         """;
 
         return Verify.VerifyRefactoringAsync(input, output);
@@ -719,8 +722,11 @@ public class PrintMembersTests
             internal string InternalProperty { get; init; }
             public string UnreadableProperty { set {} }
 
-            protected override bool PrintMembers(StringBuilder sb) =>
-                base.PrintMembers(sb);
+            protected override bool PrintMembers(StringBuilder sb)
+            {
+                return base.PrintMembers(sb);
+            }
+        }
         """;
 
         return Verify.VerifyRefactoringAsync(input, output);
@@ -755,10 +761,10 @@ public class PrintMembersTests
 
             protected override bool PrintMembers(StringBuilder sb)
             {
-                if (base.PrintMembers(sb)
+                if (base.PrintMembers(sb))
                 {
                     sb.Append(", ");
-                })
+                }
 
                 sb.Append("Field = ");
                 sb.Append(Field.ToString());
@@ -797,15 +803,15 @@ public class PrintMembersTests
         {
             protected override bool PrintMembers(StringBuilder sb)
             {
-                if (base.PrintMembers(sb)
+                if (base.PrintMembers(sb))
                 {
                     sb.Append(", ");
-                })
+                }
 
                 sb.Append("Property = ");
                 sb.Append(Property);
                 return true;
-                }
+            }
         }
         """;
 
@@ -833,20 +839,52 @@ public class PrintMembersTests
         {
         }
 
-        public record Test(string property) : Base
+        public record Test(string Property) : Base
         {
-            public string Property => property;
+            public string Property => Property;
 
             protected override bool PrintMembers(StringBuilder sb)
             {
-                if (base.PrintMembers(sb)
+                if (base.PrintMembers(sb))
                 {
                     sb.Append(", ");
-                })
+                }
 
                 sb.Append("Property = ");
                 sb.Append(Property);
                 return true;
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task PrintMembersRefactoring_GeneratesProtectedOverrideMethod_InheritedAndSealed()
+    {
+        var input = """
+        public record Base
+        {
+        }
+
+        $$public sealed record Test : Base
+        {
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record Base
+        {
+        }
+
+        public sealed record Test : Base
+        {
+            protected override bool PrintMembers(StringBuilder sb)
+            {
+                return base.PrintMembers(sb);
             }
         }
         """;
@@ -913,7 +951,7 @@ public class PrintMembersTests
         var input = """
         $$public record struct Test
         {
-            public int Field;
+            public string Field;
             public string Property { get; init; }
         }
         """;
@@ -923,7 +961,7 @@ public class PrintMembersTests
 
         public record struct Test
         {
-            public int Field;
+            public string Field;
             public string Property { get; init; }
 
             private readonly bool PrintMembers(StringBuilder sb)
