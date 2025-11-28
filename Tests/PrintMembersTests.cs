@@ -269,7 +269,7 @@ public class PrintMembersTests
             protected virtual bool PrintMembers(StringBuilder sb)
             {
                 System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-                sb.Append("Prop = );
+                sb.Append("Prop = ");
                 sb.Append(Prop);
                 return true;
             }
@@ -395,7 +395,7 @@ public class PrintMembersTests
             protected virtual bool PrintMembers(StringBuilder sb)
             {
                 System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-                sb.Append("Prop = );
+                sb.Append("Prop = ");
                 sb.Append(Prop);
                 sb.Append(", ");
                 sb.Append("Prop2 = ");
@@ -530,7 +530,7 @@ public class PrintMembersTests
             protected virtual bool PrintMembers(StringBuilder sb)
             {
                 System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-                sb.Append("Prop = );
+                sb.Append("Prop  = ");
                 sb.Append(Prop);
                 return true;
             }
@@ -590,7 +590,7 @@ public class PrintMembersTests
             protected virtual bool PrintMembers(StringBuilder sb)
             {
                 System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-                sb.Append("Prop = );
+                sb.Append("Prop  = ");
                 sb.Append(Prop);
                 return true;
             }
@@ -620,7 +620,7 @@ public class PrintMembersTests
             protected virtual bool PrintMembers(StringBuilder sb)
             {
                 System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-                sb.Append("Prop = );
+                sb.Append("Prop  = ");
                 sb.Append(Prop);
                 return true;
             }
@@ -994,7 +994,7 @@ public class PrintMembersTests
                 sb.Append("Property = ");
                 sb.Append(Property);
                 sb.Append(", ");
-                sb.Append("Property2 = );
+                sb.Append("Property2  = ");
                 sb.Append(Property2);
                 return true;
             }
