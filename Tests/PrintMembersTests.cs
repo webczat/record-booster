@@ -509,6 +509,38 @@ public class PrintMembersTests
     }
 
     [Fact]
+    public Task PrintMembersRefactoring_SkipsIndexer_IndexerGiven()
+    {
+        var input = """
+        $$public record Test
+        {
+            public string Prop { get; init; }
+            public string this[int i] => "";
+        }
+        """;
+
+        var output = """
+        using System.Text;
+
+        public record Test
+        {
+            public string Prop { get; init; }
+            public string this[int i] => "";
+
+            protected virtual bool PrintMembers(StringBuilder sb)
+            {
+                System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+                sb.Append("Prop = ");
+                sb.Append(Prop);
+                return true;
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
     public Task PrintMembersRefactoring_GeneratesMethodCorrectly_MixedPrintableAndNotPrintableMembers()
     {
         var input = """

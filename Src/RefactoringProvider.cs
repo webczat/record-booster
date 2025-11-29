@@ -193,7 +193,9 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
 
         // Retrieve printable members, being public instance fields and readable properties.
         var printableMembers = recordSymbol.GetMembers()
-        .Where(m => m is { Kind: SymbolKind.Field or SymbolKind.Property, IsStatic: false, DeclaredAccessibility: Accessibility.Public } && (m is not IPropertySymbol prop || prop.GetMethod is not null))
+        .Where(m => m is
+            IFieldSymbol { IsStatic: false, DeclaredAccessibility: Accessibility.Public } or
+            IPropertySymbol { IsStatic: false, DeclaredAccessibility: Accessibility.Public, GetMethod: not null, Parameters.IsDefaultOrEmpty: true, IsIndexer: false })
         .ToList();
 
         var inherited = recordSymbol.BaseType?.IsRecord ?? false;
