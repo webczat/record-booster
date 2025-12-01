@@ -69,6 +69,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
             return member.Parent;
         }
 
+        // Expect we're on a type declaration, standing on non type members directly is not allowed.
         return member as TypeDeclarationSyntax;
     }
 
