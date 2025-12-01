@@ -20,6 +20,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
 {
     public const string ToStringKey = "ToString";
     public const string PrintMembersKey = "PrintMembers";
+    public const string EqualsAndGetHashCodeKey = "EqualsAndGetHashCode;";
 
     public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
     {
@@ -50,6 +51,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         }
 
         RegisterToStringAndPrintMembers(context, root, recordSymbol, codeToRefactor, semanticModel.Compilation);
+        RegisterEqualsAndGetHashCode(context, root, recordSymbol, codeToRefactor, semanticModel);
     }
 
     private static SyntaxNode? GetType(SyntaxNode root, TextSpan span, SourceText text)
@@ -123,8 +125,8 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         // See if appropriate symbols exist and prevent their generation if so.
         // Implicitly declared symbols are assumed not to exist.
         var hasToString = recordSymbol.GetMembers("ToString").Any(s => s is IMethodSymbol { Parameters: [], Arity: 0, IsImplicitlyDeclared: false });
-        var hasPrintMembers = recordSymbol.GetMembers("PrintMembers").Any(s => s is IMethodSymbol { Parameters: [{ Type: var type }], Arity: 0, IsImplicitlyDeclared: false }
-        && SymbolEqualityComparer.Default.Equals(type, stringBuilderSymbol));
+        var hasPrintMembers = recordSymbol.GetMembers("PrintMembers").Any(s => s is IMethodSymbol { Parameters: [{ Type: var type }], Arity: 0, IsImplicitlyDeclared: false } &&
+            SymbolEqualityComparer.Default.Equals(type, stringBuilderSymbol));
 
         if (!hasToString)
         {
@@ -264,5 +266,27 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         var newRoot = root.ReplaceNode(originalRecord, newRecord);
         var newDocument = document.WithSyntaxRoot(newRoot);
         return newDocument;
+    }
+
+    private static void RegisterEqualsAndGetHashCode(CodeRefactoringContext context, SyntaxNode root, ITypeSymbol recordSymbol, SyntaxNode originalRecord, SemanticModel semanticModel)
+    {
+        bool hasEquals = recordSymbol.GetMembers("Equals")
+        .Any(m => m is IMethodSymbol { Arity: 0, IsImplicitlyDeclared: false, Parameters: [{ Type: var type }] } &&
+            SymbolEqualityComparer.Default.Equals(type, recordSymbol));
+        bool hasGetHashCode = recordSymbol.GetMembers("GetHashCode")
+.Any(m => m is IMethodSymbol { Arity: 0, IsImplicitlyDeclared: false, Parameters: [] });
+
+        if (!hasEquals && !hasGetHashCode)
+        {
+            context.RegisterRefactoring(CodeAction.Create(
+                "Generate default record \"Equals\" and \"GetHashCode\"",
+                ct => GenerateEqualsAndGetHashCode(context.Document, root, originalRecord, recordSymbol, semanticModel),
+                EqualsAndGetHashCodeKey));
+        }
+    }
+
+    private static async Task<Document> GenerateEqualsAndGetHashCode(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, SemanticModel semanticModel)
+    {
+        throw new NotImplementedException();
     }
 }
