@@ -1352,4 +1352,305 @@ public class EqualsAndGetHashCodeTests
 
         return CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
     }
+
+    [Fact]
+    public Task EqualsAndGetHashCodeRefactoring_DelegatesToBase_InheritedAndNoMembers()
+    {
+        var input = """
+        public record Base
+        {
+        }
+
+        $$public record Test : Base
+        {
+        }
+        """;
+
+        var output = """
+        using System;
+
+        public record Base
+        {
+        }
+
+        public record Test : Base
+        {
+            public virtual bool Equals(Test? other)
+            {
+                return other is not null &&
+                    base.Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(base.GetHashCode());
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task EqualsAndGetHashCodeRefactoring_DelegatesToBase_InheritedAndSingleMember()
+    {
+        var input = """
+        public record Base
+        {
+        }
+
+        $$public record Test : Base
+        {
+            private int _field;
+        }
+        """;
+
+        var output = """
+        using System;
+
+        public record Base
+        {
+        }
+
+        public record Test : Base
+        {
+            private int _field;
+
+            public virtual bool Equals(Test? other)
+            {
+                return other is not null &&
+                    base.Equals(other) &&
+                    _field == other._field;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(
+                    base.GetHashCode(),
+                    _field);
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task EqualsAndGetHashCodeRefactoring_ReturnsBaseHashCode_NoHashCodeStructAndInheritedWithNoMembers()
+    {
+        var input = """
+        public record Base
+        {
+        }
+
+        $$public record Test : Base
+        {
+        }
+        """;
+
+        var output = """
+        public record Base
+        {
+        }
+
+        public record Test : Base
+        {
+            public virtual bool Equals(Test? other)
+            {
+                return other is not null &&
+                    base.Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+        }
+        """;
+
+        return CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task EqualsAndGetHashCodeRefactoring_UsesValueTupleHashCode_NoHashCodeStructAndInheritedWithMembersPresent()
+    {
+        var input = """
+        public record Base
+        {
+        }
+
+        $$public record Test : Base
+        {
+            private int _field;
+        }
+        """;
+
+        var output = """
+        public record Base
+        {
+        }
+
+        public record Test : Base
+        {
+            private int _field;
+
+            public virtual bool Equals(Test? other)
+            {
+                return other is not null &&
+                    base.Equals(other) &&
+                    _field == other._field;
+            }
+
+            public override int GetHashCode()
+            {
+                return (
+                    base.GetHashCode(),
+                    _field).GetHashCode();
+            }
+        }
+        """;
+
+        return CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task EqualsAndGetHashCodeRefactoring_UsesHashCodeCombine_InheritedWithSevenFields()
+    {
+        var input = """
+        public record Base
+        {
+        }
+
+        $$public record Test : Base
+        {
+            private int _field1;
+            private int _field2;
+            private int _field3;
+            private int _field4;
+            private int _field5;
+            private int _field6;
+            private int _field7;
+        }
+        """;
+
+        var output = """
+        using System;
+
+        public record Base
+        {
+        }
+
+        public record Test : Base
+        {
+            private int _field1;
+            private int _field2;
+            private int _field3;
+            private int _field4;
+            private int _field5;
+            private int _field6;
+            private int _field7;
+
+            public virtual bool Equals(Test? other)
+            {
+                return other is not null &&
+                    base.Equals(other) &&
+                    _field1 == other._field1 &&
+                    _field2 == other._field2 &&
+                    _field3 == other._field3 &&
+                    _field4 == other._field4 &&
+                    _field5 == other._field5 &&
+                    _field6 == other._field6 &&
+                    _field7 == other._field7;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(
+                    base.GetHashCode(),
+                    _field1,
+                    _field2,
+                    _field3,
+                    _field4,
+                    _field5,
+                    _field6,
+                    _field7);
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task EqualsAndGetHashCodeRefactoring_UsesHashCodeAdd_InheritedAndMoreThanSevenFields()
+    {
+        var input = """
+        public record Base
+        {
+        }
+
+        $$public record Test : Base
+        {
+            private int _field1;
+            private int _field2;
+            private int _field3;
+            private int _field4;
+            private int _field5;
+            private int _field6;
+            private int _field7;
+            private int _field8;
+        }
+        """;
+
+        var output = """
+        using System;
+
+        public record Base
+        {
+        }
+
+        public record Test : Base
+        {
+            private int _field1;
+            private int _field2;
+            private int _field3;
+            private int _field4;
+            private int _field5;
+            private int _field6;
+            private int _field7;
+            private int _field8;
+
+            public virtual bool Equals(Test? other)
+            {
+                return other is not null &&
+                    base.Equals(other) &&
+                    _field1 == other._field1 &&
+                    _field2 == other._field2 &&
+                    _field3 == other._field3 &&
+                    _field4 == other._field4 &&
+                    _field5 == other._field5 &&
+                    _field6 == other._field6 &&
+                    _field7 == other._field7 &&
+                    _field8 == other._field8;
+            }
+
+            public override int GetHashCode()
+            {
+                HashCode h = default;
+                h.Add(base.GetHashCode());
+                h.Add(_field1);
+                h.Add(_field2);
+                h.Add(_field3);
+                h.Add(_field4);
+                h.Add(_field5);
+                h.Add(_field6);
+                h.Add(_field7);
+                h.Add(_field8);
+                return h.ToHashCode();
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
 }

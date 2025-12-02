@@ -308,6 +308,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
     private static async Task<Document> GenerateEqualsAndGetHashCode(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, SemanticModel semanticModel)
     {
         var generator = SyntaxGenerator.GetGenerator(document);
+        var inherited = recordSymbol.BaseType?.IsRecord ?? false;
 
         // We try to compare actual object data, so take all instance fields irrespective of accessibility, but not properties.
         // Then because we can't access auto props directly via fields, take respective properties in their place.
@@ -317,7 +318,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         .ToList();
 
         // In case it's a reference type not inheriting from anything, add EqualityContract first.
-        if (!recordSymbol.IsValueType)
+        if (!recordSymbol.IsValueType && !inherited)
         {
             comparableMembers.Insert(0, recordSymbol.GetMembers("EqualityContract").Single(m => m is IPropertySymbol));
         }
@@ -327,6 +328,15 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
                 SyntaxFactory.IdentifierName("other"),
                 SyntaxFactory.UnaryPattern(SyntaxFactory.ConstantPattern(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression))));
         SyntaxNode? equalityExpression = recordSymbol.IsValueType ? null : notNull;
+
+        if (inherited && equalityExpression is not null)
+        {
+            equalityExpression = SyntaxFactory.BinaryExpression(
+                SyntaxKind.LogicalAndExpression,
+                (ExpressionSyntax)equalityExpression,
+                SyntaxFactory.Token(SyntaxKind.AmpersandAmpersandToken).WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")),
+                (ExpressionSyntax)generator.InvocationExpression(generator.MemberAccessExpression(generator.BaseExpression(), "Equals"), [generator.IdentifierName("other")]).WithLeadingTrivia(SyntaxFactory.Whitespace("\t\t")));
+        }
 
         bool usesEC = false;
         foreach (var f in comparableMembers)
@@ -358,14 +368,19 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         var hasHashCode = semanticModel.Compilation.GetTypeByMetadataName("System.HashCode") is not null;
 
         SyntaxList<SyntaxNode> hashCodeStatements;
-        if (comparableMembers.Count == 0)
+        if (comparableMembers.Count == 0 && !inherited)
         {
             hashCodeStatements = new(generator.ReturnStatement(generator.LiteralExpression(0)));
         }
-        else if (hasHashCode && comparableMembers.Count > 8)
+        else if (hasHashCode && ((!inherited && comparableMembers.Count > 8) || (inherited && comparableMembers.Count > 7)))
         {
             hashCodeStatements = new();
             hashCodeStatements = hashCodeStatements.Add(generator.LocalDeclarationStatement(generator.TypeExpression(semanticModel.Compilation.GetTypeByMetadataName("System.HashCode")!), "h", generator.DefaultExpression(generator.TypeExpression(semanticModel.Compilation.GetTypeByMetadataName("System.HashCode")!))));
+
+            if (inherited)
+            {
+                hashCodeStatements = hashCodeStatements.Add(generator.InvocationExpression(generator.MemberAccessExpression(generator.IdentifierName("h"), "Add"), [generator.InvocationExpression(generator.MemberAccessExpression(generator.BaseExpression(), "GetHashCode"), [])]));
+            }
 
             foreach (var f in comparableMembers)
             {
@@ -377,9 +392,16 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         else if (hasHashCode)
         {
             // Create hashcode invocation.
-            var prettifyGetHashCode = comparableMembers.Count > 1;
+            var prettifyGetHashCode = (!inherited && comparableMembers.Count > 1) || (inherited && comparableMembers.Count > 0);
             List<SyntaxNodeOrToken> arguments = [];
-            bool firstMember = true;
+            bool firstMember = !inherited;
+
+            if (inherited)
+            {
+                arguments.Add(SyntaxFactory.Argument(SyntaxFactory.InvocationExpression(SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.BaseExpression(), SyntaxFactory.IdentifierName("GetHashCode")), SyntaxFactory.ArgumentList()))
+.WithLeadingTrivia(prettifyGetHashCode ? SyntaxFactory.Whitespace("\t\t") : SyntaxFactory.ElasticMarker));
+            }
+
             foreach (var f in comparableMembers)
             {
                 if (!firstMember)
@@ -405,7 +427,11 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         }
         else
         {
-            if (comparableMembers.Count == 1)
+            if (inherited && comparableMembers.Count == 0)
+            {
+                hashCodeStatements = new(generator.ReturnStatement(generator.InvocationExpression(generator.MemberAccessExpression(generator.BaseExpression(), "GetHashCode"), [])));
+            }
+            else if (!inherited && comparableMembers.Count == 1)
             {
                 hashCodeStatements = new(generator.ReturnStatement(generator.InvocationExpression(generator.MemberAccessExpression(generator.IdentifierName(comparableMembers[0].Name), "GetHashCode"), [])));
             }
@@ -414,6 +440,12 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
                 var tuple = ((TupleExpressionSyntax)generator.TupleExpression(comparableMembers.Select(m => generator.IdentifierName(m.Name))))
                 .WithOpenParenToken(SyntaxFactory.Token(SyntaxKind.OpenParenToken).WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")));
                 var tupleArguments = tuple.Arguments;
+
+                if (inherited)
+                {
+                    tupleArguments = tupleArguments.Insert(0, SyntaxFactory.Argument((ExpressionSyntax)generator.InvocationExpression(generator.MemberAccessExpression(generator.BaseExpression(), "GetHashCode"), [])));
+                }
+
                 for (int i = 0; i < tupleArguments.Count; i++)
                 {
                     tupleArguments = tupleArguments.Replace(tupleArguments[i], tupleArguments[i].WithLeadingTrivia(SyntaxFactory.Whitespace("\t\t")));
@@ -451,7 +483,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
 
         SyntaxList<SyntaxNode> namespacesToImport = new();
 
-        if (hasHashCode && comparableMembers.Count > 0)
+        if (hasHashCode && (comparableMembers.Count > 0 || inherited))
         {
             namespacesToImport = namespacesToImport.Add(generator.IdentifierName("System"));
         }
