@@ -300,12 +300,12 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         {
             context.RegisterRefactoring(CodeAction.Create(
                 "Generate default record \"Equals\" and \"GetHashCode\"",
-                ct => GenerateEqualsAndGetHashCode(context.Document, root, originalRecord, recordSymbol, semanticModel),
+                ct => GenerateEqualsAndGetHashCode(context.Document, root, originalRecord, recordSymbol, semanticModel, ct),
                 EqualsAndGetHashCodeKey));
         }
     }
 
-    private static async Task<Document> GenerateEqualsAndGetHashCode(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, SemanticModel semanticModel)
+    private static async Task<Document> GenerateEqualsAndGetHashCode(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, SemanticModel semanticModel, CancellationToken cancellationToken = default)
     {
         var generator = SyntaxGenerator.GetGenerator(document);
         var inherited = recordSymbol.BaseType?.IsRecord ?? false;
@@ -481,18 +481,6 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
             statements: hashCodeStatements)
             .WithAdditionalAnnotations(Simplifier.Annotation, Simplifier.AddImportsAnnotation, Formatter.Annotation);
 
-        SyntaxList<SyntaxNode> namespacesToImport = new();
-
-        if (hasHashCode && (comparableMembers.Count > 0 || inherited))
-        {
-            namespacesToImport = namespacesToImport.Add(generator.IdentifierName("System"));
-        }
-
-        if (usesEC)
-        {
-            namespacesToImport = namespacesToImport.Add(generator.DottedName("System.Collections.Generic"));
-        }
-
         var newRecord = originalRecord;
         if (((RecordDeclarationSyntax)originalRecord).SemicolonToken != default)
         {
@@ -503,6 +491,21 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         }
 
         newRecord = generator.AddMembers(newRecord, equals, getHashCode);
+
+        var imports = semanticModel.GetImportScopes(originalRecord.Span.Start, cancellationToken);
+        var systemImported = imports.Any(i => i.Imports.Any(i => i.NamespaceOrType is INamespaceSymbol { Name: "System", ContainingNamespace: { IsGlobalNamespace: true } }));
+        var scgImported = imports.Any(i => i.Imports.Any(i => i.NamespaceOrType is INamespaceSymbol { Name: "Generic", ContainingNamespace: { Name: "Collections", ContainingNamespace: { Name: "System", ContainingNamespace: { IsGlobalNamespace: true } } } }));
+        SyntaxList<SyntaxNode> namespacesToImport = new();
+        if (!systemImported && hasHashCode && (comparableMembers.Count > 0 || inherited))
+        {
+            namespacesToImport = namespacesToImport.Add(generator.IdentifierName("System"));
+        }
+
+        if (usesEC && !scgImported)
+        {
+            namespacesToImport = namespacesToImport.Add(generator.DottedName("System.Collections.Generic"));
+        }
+
         var newRoot = generator.AddNamespaceImports(root.ReplaceNode(originalRecord, newRecord), namespacesToImport);
         var newDocument = document.WithSyntaxRoot(newRoot);
         return newDocument;

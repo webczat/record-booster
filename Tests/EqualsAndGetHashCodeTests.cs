@@ -1653,4 +1653,78 @@ public class EqualsAndGetHashCodeTests
 
         return Verify.VerifyRefactoringAsync(input, output);
     }
+
+    [Fact]
+    public Task EqualsAndGetHashCodeRefactoring_RespectsNullableContext_NullableDisabled()
+    {
+        var input = """
+        #nullable disable
+
+        $$public record Test
+        {
+        }
+        """;
+
+        var output = """
+        #nullable disable
+
+        using System;
+
+        public record Test
+        {
+            public virtual bool Equals(Test other)
+            {
+                return other is not null &&
+                    EqualityContract == other.EqualityContract;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(EqualityContract);
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task EqualsAndGetHashCodeRefactoring_DoesNotAddUsings_UsingsPresent()
+    {
+        var input = """
+        using System;
+        using System.Collections.Generic;
+
+        $$public record Test
+        {
+            private string[] _field;
+        }
+        """;
+
+        var output = """
+        using System;
+        using System.Collections.Generic;
+
+        public record Test
+        {
+            private string[] _field;
+
+            public virtual bool Equals(Test? other)
+            {
+                return other is not null &&
+                    EqualityContract == other.EqualityContract &&
+                    EqualityComparer<string[]>.Default.Equals(_field, other._field);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(
+                    EqualityContract,
+                    _field);
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
 }
