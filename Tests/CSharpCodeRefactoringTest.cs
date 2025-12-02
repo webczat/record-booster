@@ -2,6 +2,7 @@
 // See the "LICENSE" file for more details.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 
@@ -24,5 +25,11 @@ public class CSharpCodeRefactoringTest : CSharpCodeRefactoringTest<RefactoringPr
     {
         ReferenceAssemblies = ReferenceAssemblies.Net.Net80;
         TestState.AnalyzerConfigFiles.Add(("/.editorconfig", EditorConfig));
+    }
+
+    protected override CompilationOptions CreateCompilationOptions()
+    {
+        return ((CSharpCompilationOptions)base.CreateCompilationOptions())
+        .WithNullableContextOptions(NullableContextOptions.Enable);
     }
 }

@@ -22,6 +22,26 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
     public const string PrintMembersKey = "PrintMembers";
     public const string EqualsAndGetHashCodeKey = "EqualsAndGetHashCode;";
 
+    private static readonly SpecialType[] BuiltinTypes = [
+        SpecialType.System_Object,
+        SpecialType.System_String,
+        SpecialType.System_Char,
+        SpecialType.System_Boolean,
+        SpecialType.System_Single,
+        SpecialType.System_Double,
+        SpecialType.System_Decimal,
+        SpecialType.System_Int64,
+        SpecialType.System_UInt64,
+        SpecialType.System_Int32,
+        SpecialType.System_UInt32,
+        SpecialType.System_Int16,
+        SpecialType.System_UInt16,
+        SpecialType.System_Byte,
+        SpecialType.System_SByte,
+        SpecialType.System_IntPtr,
+        SpecialType.System_UIntPtr,
+    ];
+
     public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
     {
         var cancellationToken = context.CancellationToken;
@@ -287,6 +307,172 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
 
     private static async Task<Document> GenerateEqualsAndGetHashCode(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, SemanticModel semanticModel)
     {
-        throw new NotImplementedException();
+        var generator = SyntaxGenerator.GetGenerator(document);
+
+        // We try to compare actual object data, so take all instance fields irrespective of accessibility, but not properties.
+        // Then because we can't access auto props directly via fields, take respective properties in their place.
+        var comparableMembers = recordSymbol.GetMembers()
+        .Where(m => m is IFieldSymbol { IsStatic: false })
+        .Select(m => m is IFieldSymbol { AssociatedSymbol: not null } f ? f.AssociatedSymbol : m)
+        .ToList();
+
+        // In case it's a reference type not inheriting from anything, add EqualityContract first.
+        if (!recordSymbol.IsValueType)
+        {
+            comparableMembers.Insert(0, recordSymbol.GetMembers("EqualityContract").Single(m => m is IPropertySymbol));
+        }
+
+        // Construct the equality expression based on members.
+        ExpressionSyntax notNull = SyntaxFactory.IsPatternExpression(
+                SyntaxFactory.IdentifierName("other"),
+                SyntaxFactory.UnaryPattern(SyntaxFactory.ConstantPattern(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression))));
+        SyntaxNode? equalityExpression = recordSymbol.IsValueType ? null : notNull;
+
+        bool usesEC = false;
+        foreach (var f in comparableMembers)
+        {
+            var type = (f as IFieldSymbol)?.Type ?? ((IPropertySymbol)f).Type;
+            SyntaxNode expression;
+            if (BuiltinTypes.Contains(type.SpecialType) || type.TypeKind is TypeKind.Enum | type.GetMembers(WellKnownMemberNames.EqualityOperatorName)
+            .Any(m => m is IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator or MethodKind.BuiltinOperator, Parameters: [{ Type: var t1 }, { Type: var t2 }] } &&
+                SymbolEqualityComparer.Default.Equals(t1, t2) &&
+                SymbolEqualityComparer.Default.Equals(t1, type)))
+            {
+                expression = generator.ValueEqualsExpression(generator.IdentifierName(f.Name), generator.MemberAccessExpression(generator.IdentifierName("other"), f.Name));
+            }
+            else
+            {
+                usesEC = true;
+                expression = generator.InvocationExpression(generator.MemberAccessExpression(generator.MemberAccessExpression(generator.MemberAccessExpression(generator.MemberAccessExpression(generator.MemberAccessExpression(generator.IdentifierName("System"), "Collections"), "Generic"), generator.GenericName("EqualityComparer", [generator.TypeExpression(type, false)])), "Default"), "Equals"), [generator.IdentifierName(f.Name), generator.MemberAccessExpression(generator.IdentifierName("other"), f.Name)]);
+            }
+
+            equalityExpression = equalityExpression == null ? expression : SyntaxFactory.BinaryExpression(
+                SyntaxKind.LogicalAndExpression,
+                (ExpressionSyntax)equalityExpression,
+                SyntaxFactory.Token(SyntaxKind.AmpersandAmpersandToken).WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")),
+                (ExpressionSyntax)expression.WithLeadingTrivia(SyntaxFactory.Whitespace("\t\t")));
+        }
+
+        equalityExpression ??= generator.TrueLiteralExpression();
+
+        var hasHashCode = semanticModel.Compilation.GetTypeByMetadataName("System.HashCode") is not null;
+
+        SyntaxList<SyntaxNode> hashCodeStatements;
+        if (comparableMembers.Count == 0)
+        {
+            hashCodeStatements = new(generator.ReturnStatement(generator.LiteralExpression(0)));
+        }
+        else if (hasHashCode && comparableMembers.Count > 8)
+        {
+            hashCodeStatements = new();
+            hashCodeStatements = hashCodeStatements.Add(generator.LocalDeclarationStatement(generator.TypeExpression(semanticModel.Compilation.GetTypeByMetadataName("System.HashCode")!), "h", generator.DefaultExpression(generator.TypeExpression(semanticModel.Compilation.GetTypeByMetadataName("System.HashCode")!))));
+
+            foreach (var f in comparableMembers)
+            {
+                hashCodeStatements = hashCodeStatements.Add(generator.InvocationExpression(generator.MemberAccessExpression(generator.IdentifierName("h"), "Add"), [generator.IdentifierName(f.Name)]));
+            }
+
+            hashCodeStatements = hashCodeStatements.Add(generator.ReturnStatement(generator.InvocationExpression(generator.MemberAccessExpression(generator.IdentifierName("h"), "ToHashCode"), [])));
+        }
+        else if (hasHashCode)
+        {
+            // Create hashcode invocation.
+            var prettifyGetHashCode = comparableMembers.Count > 1;
+            List<SyntaxNodeOrToken> arguments = [];
+            bool firstMember = true;
+            foreach (var f in comparableMembers)
+            {
+                if (!firstMember)
+                {
+                    // Add comma.
+                    var token = SyntaxFactory.Token(SyntaxKind.CommaToken)
+                    .WithTrailingTrivia(prettifyGetHashCode ? SyntaxFactory.EndOfLine("\r\n") : SyntaxFactory.ElasticMarker);
+                    arguments.Add(token);
+                }
+
+                firstMember = false;
+                arguments.Add(SyntaxFactory.Argument(SyntaxFactory.IdentifierName(f.Name))
+                .WithLeadingTrivia(prettifyGetHashCode ? SyntaxFactory.Whitespace("\t\t") : SyntaxFactory.ElasticMarker));
+            }
+
+            var argumentList = SyntaxFactory.ArgumentList(
+                SyntaxFactory.Token(SyntaxKind.OpenParenToken).WithTrailingTrivia(prettifyGetHashCode ? SyntaxFactory.EndOfLine("\r\n") : SyntaxFactory.ElasticMarker),
+                SyntaxFactory.SeparatedList<ArgumentSyntax>(arguments),
+                SyntaxFactory.Token(SyntaxKind.CloseParenToken));
+            hashCodeStatements = new([
+                generator.ReturnStatement(SyntaxFactory.InvocationExpression((MemberAccessExpressionSyntax)generator.MemberAccessExpression(generator.MemberAccessExpression(generator.IdentifierName("System"), "HashCode"), "Combine"), argumentList)),
+                ]);
+        }
+        else
+        {
+            if (comparableMembers.Count == 1)
+            {
+                hashCodeStatements = new(generator.ReturnStatement(generator.InvocationExpression(generator.MemberAccessExpression(generator.IdentifierName(comparableMembers[0].Name), "GetHashCode"), [])));
+            }
+            else
+            {
+                var tuple = ((TupleExpressionSyntax)generator.TupleExpression(comparableMembers.Select(m => generator.IdentifierName(m.Name))))
+                .WithOpenParenToken(SyntaxFactory.Token(SyntaxKind.OpenParenToken).WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")));
+                var tupleArguments = tuple.Arguments;
+                for (int i = 0; i < tupleArguments.Count; i++)
+                {
+                    tupleArguments = tupleArguments.Replace(tupleArguments[i], tupleArguments[i].WithLeadingTrivia(SyntaxFactory.Whitespace("\t\t")));
+                }
+
+                for (int i = 0; i < tupleArguments.SeparatorCount; i++)
+                {
+                    tupleArguments = tupleArguments.ReplaceSeparator(tupleArguments.GetSeparator(i), SyntaxFactory.Token(SyntaxKind.CommaToken).WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")));
+                }
+
+                tuple = tuple.WithArguments(tupleArguments);
+                hashCodeStatements = new(generator.ReturnStatement(generator.InvocationExpression(generator.MemberAccessExpression(tuple, "GetHashCode"), [])));
+            }
+        }
+
+        var equals = generator.MethodDeclaration(
+            "Equals",
+            accessibility: Accessibility.Public,
+            modifiers: recordSymbol.IsValueType ? DeclarationModifiers.ReadOnly : recordSymbol.IsSealed ? DeclarationModifiers.None : DeclarationModifiers.Virtual,
+            returnType: generator.TypeExpression(SpecialType.System_Boolean),
+            parameters: [generator.ParameterDeclaration("other", recordSymbol.IsValueType ? generator.TypeExpression(recordSymbol) : generator.NullableTypeExpression(generator.TypeExpression(recordSymbol)))],
+            statements: [
+                generator.ReturnStatement(equalityExpression),
+            ])
+        .WithAdditionalAnnotations(Simplifier.Annotation, Simplifier.AddImportsAnnotation, Formatter.Annotation);
+
+        var getHashCode = generator.MethodDeclaration(
+            "GetHashCode",
+            accessibility: Accessibility.Public,
+            modifiers: recordSymbol.IsValueType ? DeclarationModifiers.Override | DeclarationModifiers.ReadOnly : DeclarationModifiers.Override,
+            returnType: generator.TypeExpression(SpecialType.System_Int32),
+            parameters: [],
+            statements: hashCodeStatements)
+            .WithAdditionalAnnotations(Simplifier.Annotation, Simplifier.AddImportsAnnotation, Formatter.Annotation);
+
+        SyntaxList<SyntaxNode> namespacesToImport = new();
+
+        if (hasHashCode && comparableMembers.Count > 0)
+        {
+            namespacesToImport = namespacesToImport.Add(generator.IdentifierName("System"));
+        }
+
+        if (usesEC)
+        {
+            namespacesToImport = namespacesToImport.Add(generator.DottedName("System.Collections.Generic"));
+        }
+
+        var newRecord = originalRecord;
+        if (((RecordDeclarationSyntax)originalRecord).SemicolonToken != default)
+        {
+            newRecord = ((RecordDeclarationSyntax)originalRecord).WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken))
+            .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken))
+            .WithSemicolonToken(default)
+            .NormalizeWhitespace();
+        }
+
+        newRecord = generator.AddMembers(newRecord, equals, getHashCode);
+        var newRoot = generator.AddNamespaceImports(root.ReplaceNode(originalRecord, newRecord), namespacesToImport);
+        var newDocument = document.WithSyntaxRoot(newRoot);
+        return newDocument;
     }
 }
