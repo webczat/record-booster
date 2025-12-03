@@ -398,6 +398,56 @@ public class ToStringTests
         return Verify.VerifyRefactoringAsync(input, output);
     }
 
+    [Theory]
+    [InlineData("public string ToString(int x)")]
+    [InlineData("public string ToString(ref int x)")]
+    [InlineData("public string ToString(int x, int y)")]
+    public Task PrintMembersRefactoring_GeneratesMethod_OtherPrintMemberOverloadsPresent(string overload)
+    {
+        var input = $$"""
+        using System;
+        using System.Text;
+
+        $$public record Test
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+        }
+        """;
+
+        var output = $$"""
+        using System;
+        using System.Text;
+
+        public record Test
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(nameof(Test));
+                sb.Append(" { ");
+
+                if (PrintMembers(sb))
+                {
+                    sb.Append(' ');
+                }
+
+                sb.Append('}');
+                return sb.ToString();
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
     [Fact]
     public Task ToStringRefactoring_GeneratesToStringInInnerType_RecordsNestedAndCursorOnNestedType()
     {

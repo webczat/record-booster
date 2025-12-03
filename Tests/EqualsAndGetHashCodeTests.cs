@@ -414,6 +414,94 @@ public class EqualsAndGetHashCodeTests
         return Verify.VerifyRefactoringAsync(input, output);
     }
 
+    [Theory]
+    [InlineData("public virtual bool Equals()")]
+    [InlineData("public virtual bool Equals(int other)")]
+    [InlineData("public virtual bool Equals(ref Test? other)")]
+    [InlineData("public virtual bool Equals(Test? other, int x)")]
+    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_OtherEqualsOverloadsPresent(string overload)
+    {
+        var input = $$"""
+        using System;
+
+        $$public record Test
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+        }
+        """;
+
+        var output = $$"""
+        using System;
+
+        public record Test
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+
+            public virtual bool Equals(Test? other)
+            {
+                return other is not null &&
+                    EqualityContract == other.EqualityContract;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(EqualityContract);
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Theory]
+    [InlineData("public int GetHashCode(int x)")]
+    [InlineData("public int GetHashCode(ref int x)")]
+    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_OtherGetHashCodeOverloadsPresent(string overload)
+    {
+        var input = $$"""
+        using System;
+
+        $$public record Test
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+        }
+        """;
+
+        var output = $$"""
+        using System;
+
+        public record Test
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+
+            public virtual bool Equals(Test? other)
+            {
+                return other is not null &&
+                    EqualityContract == other.EqualityContract;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(EqualityContract);
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
     [Fact]
     public Task EqualsAndGetHashCodeRefactoring_GeneratesMethodsInInnerType_NestedRecordAndCursorOnInnerType()
     {

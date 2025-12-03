@@ -408,6 +408,47 @@ public class PrintMembersTests
         return Verify.VerifyRefactoringAsync(input, output);
     }
 
+    [Theory]
+    [InlineData("protected virtual bool PrintMembers()")]
+    [InlineData("protected virtual bool PrintMembers(ref StringBuilder sb)")]
+    [InlineData("protected virtual bool PrintMembers(string sb)")]
+    [InlineData("protected virtual bool PrintMembers(StringBuilder sb, StringBuilder sb2)")]
+    public Task PrintMembersRefactoring_GeneratesMethod_OtherPrintMemberOverloadsPresent(string overload)
+    {
+        var input = $$"""
+        using System;
+        using System.Text;
+
+        $$public record Test
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+        }
+        """;
+
+        var output = $$"""
+        using System;
+        using System.Text;
+
+        public record Test
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+
+            protected virtual bool PrintMembers(StringBuilder sb)
+            {
+                return false;
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
     [Fact]
     public Task PrintMembersRefactoring_GeneratesMethodInInnerType_RecordsNestedAndCursorOnNestedType()
     {

@@ -375,6 +375,112 @@ public class DeconstructTests
         return Verify.VerifyRefactoringAsync(input, output);
     }
 
+    [Theory]
+    [InlineData("public void Deconstruct(out int Prop1)")]
+    [InlineData("public void Deconstruct()")]
+    [InlineData("public void Deconstruct(int Prop1, out int Prop2)")]
+    [InlineData("public void Deconstruct(out string Prop1, out int Prop2)")]
+    [InlineData("public void Deconstruct(out int Prop1, out int Prop2, out int Prop3)")]
+    public Task DeconstructRefactoring_GeneratesMethod_OtherDeconstructOverloadsPresent(string overload)
+    {
+        var input = $$"""
+        using System;
+
+        $$public record Test(int Prop1, int Prop2)
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+        }
+        """;
+
+        var output = $$"""
+        using System;
+
+        public record Test(int Prop1, int Prop2)
+        {
+            {{overload}}
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Deconstruct(out int Prop1, out int Prop2)
+            {
+                Prop1 = this.Prop1;
+                Prop2 = this.Prop2;
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task DeconstructRefactoring_GeneratesMethodInOuter_NestedRecordsAndCursorBeforeInner()
+    {
+        var input = """
+        public record Outer(int Prop)
+        {
+
+        $$
+            public record Inner(int Prop)
+            {
+            }
+        }
+        """;
+
+        var output = """
+        public record Outer(int Prop)
+        {
+
+
+            public record Inner(int Prop)
+            {
+            }
+
+            public void Deconstruct(out int Prop)
+            {
+                Prop = this.Prop;
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
+    [Fact]
+    public Task DeconstructRefactoring_GeneratesMethodInInner_NestedRecordsAndCursorOnInner()
+    {
+        var input = """
+        public record Outer(int Prop)
+        {
+
+
+            $$public record Inner(int Prop)
+            {
+            }
+        }
+        """;
+
+        var output = """
+        public record Outer(int Prop)
+        {
+
+
+            public record Inner(int Prop)
+            {
+                public void Deconstruct(out int Prop)
+                {
+                    Prop = this.Prop;
+                }
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
+
     [Fact]
     public Task DeconstructRefactoring_GeneratesMethodWithParamsFromPrimaryConstructor_MultipleParameters()
     {
