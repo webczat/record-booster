@@ -21,6 +21,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
     public const string ToStringKey = "ToString";
     public const string PrintMembersKey = "PrintMembers";
     public const string EqualsAndGetHashCodeKey = "EqualsAndGetHashCode;";
+    public const string DeconstructKey = "Deconstruct";
 
     private static readonly SpecialType[] BuiltinTypes = [
         SpecialType.System_Object,
@@ -72,6 +73,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
 
         RegisterToStringAndPrintMembers(context, root, recordSymbol, codeToRefactor, semanticModel.Compilation);
         RegisterEqualsAndGetHashCode(context, root, recordSymbol, codeToRefactor, semanticModel);
+        RegisterDeconstruct(context, root, recordSymbol, codeToRefactor, semanticModel, cancellationToken);
     }
 
     private static SyntaxNode? GetType(SyntaxNode root, TextSpan span, SourceText text)
@@ -145,7 +147,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         // See if appropriate symbols exist and prevent their generation if so.
         // Implicitly declared symbols are assumed not to exist.
         var hasToString = recordSymbol.GetMembers("ToString").Any(s => s is IMethodSymbol { Parameters: [], Arity: 0, IsImplicitlyDeclared: false });
-        var hasPrintMembers = recordSymbol.GetMembers("PrintMembers").Any(s => s is IMethodSymbol { Parameters: [{ Type: var type }], Arity: 0, IsImplicitlyDeclared: false } &&
+        var hasPrintMembers = recordSymbol.GetMembers("PrintMembers").Any(s => s is IMethodSymbol { Parameters: [{ Type: var type, RefKind: RefKind.None }], Arity: 0, IsImplicitlyDeclared: false } &&
             SymbolEqualityComparer.Default.Equals(type, stringBuilderSymbol));
 
         if (!hasToString)
@@ -291,7 +293,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
     private static void RegisterEqualsAndGetHashCode(CodeRefactoringContext context, SyntaxNode root, ITypeSymbol recordSymbol, SyntaxNode originalRecord, SemanticModel semanticModel)
     {
         bool hasEquals = recordSymbol.GetMembers("Equals")
-        .Any(m => m is IMethodSymbol { Arity: 0, IsImplicitlyDeclared: false, Parameters: [{ Type: var type }] } &&
+        .Any(m => m is IMethodSymbol { Arity: 0, IsImplicitlyDeclared: false, Parameters: [{ Type: var type, RefKind: RefKind.None }] } &&
             SymbolEqualityComparer.Default.Equals(type, recordSymbol));
         bool hasGetHashCode = recordSymbol.GetMembers("GetHashCode")
 .Any(m => m is IMethodSymbol { Arity: 0, IsImplicitlyDeclared: false, Parameters: [] });
@@ -493,8 +495,8 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         newRecord = generator.AddMembers(newRecord, equals, getHashCode);
 
         var imports = semanticModel.GetImportScopes(originalRecord.Span.Start, cancellationToken);
-        var systemImported = imports.Any(i => i.Imports.Any(i => i.NamespaceOrType is INamespaceSymbol { Name: "System", ContainingNamespace: { IsGlobalNamespace: true } }));
-        var scgImported = imports.Any(i => i.Imports.Any(i => i.NamespaceOrType is INamespaceSymbol { Name: "Generic", ContainingNamespace: { Name: "Collections", ContainingNamespace: { Name: "System", ContainingNamespace: { IsGlobalNamespace: true } } } }));
+        var systemImported = imports.Any(i => i.Imports.Any(i => i.NamespaceOrType is INamespaceSymbol { Name: "System", ContainingNamespace.IsGlobalNamespace: true }));
+        var scgImported = imports.Any(i => i.Imports.Any(i => i.NamespaceOrType is INamespaceSymbol { Name: "Generic", ContainingNamespace: { Name: "Collections", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } }));
         SyntaxList<SyntaxNode> namespacesToImport = new();
         if (!systemImported && hasHashCode && (comparableMembers.Count > 0 || inherited))
         {
@@ -507,6 +509,92 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         }
 
         var newRoot = generator.AddNamespaceImports(root.ReplaceNode(originalRecord, newRecord), namespacesToImport);
+        var newDocument = document.WithSyntaxRoot(newRoot);
+        return newDocument;
+    }
+
+    private static void RegisterDeconstruct(CodeRefactoringContext context, SyntaxNode root, ITypeSymbol recordSymbol, SyntaxNode originalRecord, SemanticModel semanticModel, CancellationToken cancellationToken = default)
+    {
+        // Ignore non positional records.
+        if (((RecordDeclarationSyntax)originalRecord).ParameterList is not ParameterListSyntax parameterList || parameterList.Parameters.Count == 0)
+        {
+            return;
+        }
+
+        // Get all symbols corresponding to parameters.
+        var parameterSymbols = new List<IParameterSymbol>();
+        foreach (var parameter in parameterList.Parameters)
+        {
+            var symbol = semanticModel.GetDeclaredSymbol(parameter, cancellationToken);
+            if (symbol is null)
+            {
+                return;
+            }
+
+            parameterSymbols.Add(symbol);
+        }
+
+        // Proper deconstruct depends on the primary constructor, so we need to check if order, type and ref kind of all parameters match expectations.
+        var hasDeconstruct = recordSymbol.GetMembers("Deconstruct")
+        .OfType<IMethodSymbol>()
+        .Where(m => m is { Arity: 0, IsImplicitlyDeclared: false } &&
+            m.Parameters.Length == parameterSymbols.Count)
+        .Any(
+            m => parameterSymbols.Zip(m.Parameters, (left, right) => (Left: left, Right: right))
+            .All(p => SymbolEqualityComparer.Default.Equals(p.Left.Type, p.Right.Type) && p.Right.RefKind is not RefKind.None));
+
+        if (!hasDeconstruct)
+        {
+            var associatedMembers = new List<ISymbol>(parameterSymbols.Count);
+            foreach (var param in parameterSymbols)
+            {
+                var member = recordSymbol.GetMembers(param.Name)
+                .SingleOrDefault(m => m is IFieldSymbol or (IPropertySymbol { GetMethod: not null }));
+                if (member is null)
+                {
+                    return;
+                }
+
+                associatedMembers.Add(member);
+            }
+
+            context.RegisterRefactoring(CodeAction.Create(
+                "Generate default record \"Deconstruct\"",
+                ct => GenerateDeconstruct(context.Document, root, originalRecord, recordSymbol, associatedMembers),
+                DeconstructKey));
+        }
+    }
+
+    private static async Task<Document> GenerateDeconstruct(Document document, SyntaxNode root, SyntaxNode originalRecord, ITypeSymbol recordSymbol, List<ISymbol> associatedMembers)
+    {
+        var generator = SyntaxGenerator.GetGenerator(document);
+        var isReadOnly = recordSymbol.IsValueType;
+
+        var parameterList = new List<SyntaxNode>(associatedMembers.Count);
+        var assignments = new List<SyntaxNode>(associatedMembers.Count);
+        foreach (var m in associatedMembers)
+        {
+            var type = (m as IFieldSymbol)?.Type ?? ((IPropertySymbol)m).Type;
+
+            if (m is IPropertySymbol { GetMethod.IsReadOnly: false })
+            {
+                isReadOnly = false;
+            }
+
+            parameterList.Add(generator.ParameterDeclaration(m.Name, generator.TypeExpression(type), refKind: RefKind.Out));
+            assignments.Add(generator.AssignmentStatement(generator.IdentifierName(m.Name), generator.MemberAccessExpression(generator.ThisExpression(), m.Name)));
+        }
+
+        var deconstruct = generator.MethodDeclaration(
+            "Deconstruct",
+            accessibility: Accessibility.Public,
+            modifiers: isReadOnly ? DeclarationModifiers.ReadOnly : DeclarationModifiers.None,
+            parameters: parameterList,
+            statements: assignments)
+            .WithAdditionalAnnotations(Simplifier.Annotation, Formatter.Annotation, Simplifier.AddImportsAnnotation);
+
+        var newRecord = generator.AddMembers(originalRecord, deconstruct);
+        var newRoot = root.ReplaceNode(originalRecord, newRecord);
         var newDocument = document.WithSyntaxRoot(newRoot);
         return newDocument;
     }
