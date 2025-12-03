@@ -1727,4 +1727,41 @@ public class EqualsAndGetHashCodeTests
 
         return Verify.VerifyRefactoringAsync(input, output);
     }
+
+    [Fact]
+    public Task EqualsAndGetHashCodeRefactoring_UsesEqualityComparer_GenericTypeParameters()
+    {
+        var input = """
+        $$public record Test<T>
+        {
+            private T _field;
+        }
+        """;
+
+        var output = """
+        using System;
+        using System.Collections.Generic;
+
+        public record Test<T>
+        {
+            private T _field;
+
+            public virtual bool Equals(Test<T>? other)
+            {
+                return other is not null &&
+                    EqualityContract == other.EqualityContract &&
+                    EqualityComparer<T>.Default.Equals(_field, other._field);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(
+                    EqualityContract,
+                    _field);
+            }
+        }
+        """;
+
+        return Verify.VerifyRefactoringAsync(input, output);
+    }
 }
