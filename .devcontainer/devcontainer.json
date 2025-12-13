@@ -14,12 +14,8 @@
       "extensions": [
         "ms-dotnettools.csdevkit",
         "github.vscode-github-actions",
-        "ms-vscode.vscode-github-issue-notebooks",
         "eamodio.gitlens",
-        "shd101wyy.markdown-preview-enhanced",
-        "DotJoshJohnson.xml",
         "redhat.vscode-yaml",
-        "ms-dotnettools.vscodeintellicode-csharp",
         "EditorConfig.EditorConfig"
       ],
       "settings": {
