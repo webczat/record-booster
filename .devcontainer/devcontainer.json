@@ -2,6 +2,10 @@
   "name": "record-booster-env",
   "image": "ubuntu",
   "remoteUser": "ubuntu",
+  "onCreateCommand": "sudo chown -R ubuntu:ubuntu /home/ubuntu/.nuget",
+  "mounts": [
+    "src=record-booster-nugets,target=/home/ubuntu/.nuget,type=volume"
+  ],
   "features": {
     "ghcr.io/devcontainers/features/dotnet:2": {
       "version": "8.0"
