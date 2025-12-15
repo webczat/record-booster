@@ -1,17 +1,18 @@
 {
   "name": "record-booster-env",
-  "image": "ubuntu",
-  "remoteUser": "ubuntu",
-  "onCreateCommand": "sudo chown -R ubuntu:ubuntu /home/ubuntu/.nuget",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "vscode",
   "mounts": [
-    "src=record-booster-nugets,target=/home/ubuntu/.nuget,type=volume"
+    "src=record-booster-nugets,target=/home/vscode/.nuget,type=volume"
   ],
   "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {},
     "ghcr.io/devcontainers/features/dotnet:2": {
       "version": "8.0"
     },
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/common-utils:2": {}
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "customizations": {
     "vscode": {
