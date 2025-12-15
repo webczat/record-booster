@@ -21,7 +21,9 @@
         "github.vscode-github-actions",
         "eamodio.gitlens",
         "redhat.vscode-yaml",
-        "EditorConfig.EditorConfig"
+        "EditorConfig.EditorConfig",
+        "redhat.vscode-xml",
+        "tintoy.msbuild-project-tools"
       ],
       "settings": {
         "csharp.debug.justMyCode": false,

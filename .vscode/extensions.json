@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csdevkit",
+        "editorconfig.editorconfig",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "redhat.vscode-yaml",
+        "redhat.vscode-xml",
+        "tintoy.msbuild-project-tools"
+    ]
+}
