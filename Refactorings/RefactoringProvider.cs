@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Simplification;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Webczat.RecordBooster;
+namespace Webczat.RecordBooster.Refactorings;
 
 [ExportCodeRefactoringProvider(LanguageNames.CSharp)]
 public sealed class RefactoringProvider : CodeRefactoringProvider

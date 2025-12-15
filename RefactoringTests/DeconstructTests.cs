@@ -3,9 +3,9 @@
 
 using Xunit;
 
-using Verify = Microsoft.CodeAnalysis.Testing.CodeRefactoringVerifier<Webczat.RecordBooster.RefactoringProvider, Webczat.RecordBooster.CSharpDeconstructCodeRefactoringTest, Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
+using Verify = Microsoft.CodeAnalysis.Testing.CodeRefactoringVerifier<Webczat.RecordBooster.Refactorings.RefactoringProvider, Webczat.RecordBooster.Refactorings.CSharpDeconstructCodeRefactoringTest, Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
 
-namespace Webczat.RecordBooster;
+namespace Webczat.RecordBooster.Refactorings;
 
 public class DeconstructTests
 {

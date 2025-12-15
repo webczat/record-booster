@@ -1,7 +1,7 @@
 // This file is licensed under the MIT license.
 // See the "LICENSE" file for more details.
 
-namespace Webczat.RecordBooster;
+namespace Webczat.RecordBooster.Refactorings;
 
 public class CSharpEqualsAndGetHashCodeCodeRefactoringTest : CSharpCodeRefactoringTest
 {

@@ -2,7 +2,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
-        <RootNamespace>Webczat.RecordBooster</RootNamespace>
+        <RootNamespace>Webczat.RecordBooster.Refactorings</RootNamespace>
         <Description>Tests for RecordBooster</Description>
         <!-- Tests are not packable. -->
         <IsPackable>false</IsPackable>
@@ -20,12 +20,12 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="xunit.v3" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="All" ExcludeAssets="compile;runtime"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="All" ExcludeAssets="compile;runtime" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="../Src/Webczat.RecordBooster.csproj" />
+        <ProjectReference Include="../Refactorings/Webczat.RecordBooster.Refactorings.csproj" />
     </ItemGroup>
 </Project>

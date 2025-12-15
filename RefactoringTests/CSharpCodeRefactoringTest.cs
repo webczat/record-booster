@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 
-namespace Webczat.RecordBooster;
+namespace Webczat.RecordBooster.Refactorings;
 
 public class CSharpCodeRefactoringTest : CSharpCodeRefactoringTest<RefactoringProvider, DefaultVerifier>
 {

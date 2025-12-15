@@ -2,7 +2,7 @@
 // See the "LICENSE" file for more details.
 using Microsoft.CodeAnalysis.Testing;
 
-namespace Webczat.RecordBooster;
+namespace Webczat.RecordBooster.Refactorings;
 
 public class CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest : CSharpCodeRefactoringTest
 {

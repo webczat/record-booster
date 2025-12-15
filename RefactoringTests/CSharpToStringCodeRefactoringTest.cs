@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis.Testing;
 
-namespace Webczat.RecordBooster;
+namespace Webczat.RecordBooster.Refactorings;
 
 public class CSharpToStringCodeRefactoringTest : CSharpCodeRefactoringTest
 {

@@ -3,9 +3,11 @@
 
 using Microsoft.CodeAnalysis.Testing;
 
+using Webczat.RecordBooster.Refactorings;
+
 using Xunit;
 
-using Verify = Microsoft.CodeAnalysis.Testing.CodeRefactoringVerifier<Webczat.RecordBooster.RefactoringProvider, Webczat.RecordBooster.CSharpEqualsAndGetHashCodeCodeRefactoringTest, Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
+using Verify = Microsoft.CodeAnalysis.Testing.CodeRefactoringVerifier<Webczat.RecordBooster.Refactorings.RefactoringProvider, Webczat.RecordBooster.Refactorings.CSharpEqualsAndGetHashCodeCodeRefactoringTest, Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
 
 namespace Webczat.RecordBooster;
 
