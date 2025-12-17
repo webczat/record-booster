@@ -4,6 +4,7 @@
     "dockerfile": "Dockerfile"
   },
   "remoteUser": "vscode",
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode",
   "mounts": [
     "src=record-booster-nugets,target=/home/vscode/.nuget,type=volume"
   ],
