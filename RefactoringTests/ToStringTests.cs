@@ -402,7 +402,7 @@ public class ToStringTests
     [InlineData("public string ToString(int x)")]
     [InlineData("public string ToString(ref int x)")]
     [InlineData("public string ToString(int x, int y)")]
-    public Task PrintMembersRefactoring_GeneratesMethod_OtherPrintMemberOverloadsPresent(string overload)
+    public Task ToStringRefactoring_GeneratesMethod_OtherToStringOverloadsPresent(string overload)
     {
         var input = $$"""
         using System;

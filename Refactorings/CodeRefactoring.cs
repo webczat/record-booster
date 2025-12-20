@@ -32,7 +32,7 @@ public abstract class CodeRefactoring(CodeRefactoringContext context, SyntaxNode
             return false;
         }
 
-        if (!IsApplicable(originalRecord, originalRecordSymbol))
+        if (!Prepare(originalRecord, originalRecordSymbol))
         {
             return false;
         }
@@ -41,7 +41,7 @@ public abstract class CodeRefactoring(CodeRefactoringContext context, SyntaxNode
         return true;
     }
 
-    protected abstract bool IsApplicable(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol);
+    protected abstract bool Prepare(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol);
 
     protected abstract Task<Document> Execute(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default);
 }

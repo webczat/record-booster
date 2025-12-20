@@ -41,7 +41,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
     public override string Title => "Generate default record \"Equals\" and \"GetHashCode\"";
 
-    protected override bool IsApplicable(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
+    protected override bool Prepare(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
     {
         bool hasEquals = originalRecordSymbol.GetMembers(EqualsMethod)
             .Any(m => m is IMethodSymbol { Arity: 0, IsImplicitlyDeclared: false, Parameters: [{ Type: var type, RefKind: RefKind.None }] } &&

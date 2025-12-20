@@ -22,7 +22,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
     public override string Title => "Generate default record \"Deconstruct\"";
 
-    protected override bool IsApplicable(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
+    protected override bool Prepare(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
     {
         var document = Context.Document;
 

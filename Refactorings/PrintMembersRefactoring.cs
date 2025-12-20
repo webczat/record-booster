@@ -21,7 +21,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
     public override string Title => "Generate default record \"PrintMembers\"";
 
-    protected override bool IsApplicable(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
+    protected override bool Prepare(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
     {
         if (_stringBuilderSymbol is null)
         {
