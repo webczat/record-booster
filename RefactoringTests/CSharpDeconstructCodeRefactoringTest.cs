@@ -7,6 +7,6 @@ public class CSharpDeconstructCodeRefactoringTest : CSharpCodeRefactoringTest
 {
     public CSharpDeconstructCodeRefactoringTest()
     {
-        CodeActionEquivalenceKey = RefactoringProvider.DeconstructKey;
+        CodeActionEquivalenceKey = "Deconstruct";
     }
 }

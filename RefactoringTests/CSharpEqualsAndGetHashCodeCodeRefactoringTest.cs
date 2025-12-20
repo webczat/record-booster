@@ -7,6 +7,6 @@ public class CSharpEqualsAndGetHashCodeCodeRefactoringTest : CSharpCodeRefactori
 {
     public CSharpEqualsAndGetHashCodeCodeRefactoringTest()
     {
-        CodeActionEquivalenceKey = RefactoringProvider.EqualsAndGetHashCodeKey;
+        CodeActionEquivalenceKey = "EqualsAndGetHashCode";
     }
 }

@@ -8,7 +8,7 @@ public class CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest : CSharpCo
 {
     public CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest()
     {
-        CodeActionEquivalenceKey = RefactoringProvider.EqualsAndGetHashCodeKey;
+        CodeActionEquivalenceKey = "EqualsAndGetHashCode";
         ReferenceAssemblies = ReferenceAssemblies.NetStandard.NetStandard20;
     }
 }

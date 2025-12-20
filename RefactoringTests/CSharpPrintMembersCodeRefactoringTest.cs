@@ -7,6 +7,6 @@ public class CSharpPrintMembersCodeRefactoringTest : CSharpCodeRefactoringTest
 {
     public CSharpPrintMembersCodeRefactoringTest()
     {
-        CodeActionEquivalenceKey = RefactoringProvider.PrintMembersKey;
+        CodeActionEquivalenceKey = "PrintMembers";
     }
 }

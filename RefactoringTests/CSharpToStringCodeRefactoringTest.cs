@@ -9,6 +9,6 @@ public class CSharpToStringCodeRefactoringTest : CSharpCodeRefactoringTest
 {
     public CSharpToStringCodeRefactoringTest()
     {
-        CodeActionEquivalenceKey = RefactoringProvider.ToStringKey;
+        CodeActionEquivalenceKey = "ToString";
     }
 }
