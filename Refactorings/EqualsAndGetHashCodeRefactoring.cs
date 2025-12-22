@@ -71,11 +71,9 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
         if (inherited && equalityExpression is not null)
         {
-            equalityExpression = SyntaxFactory.BinaryExpression(
-                SyntaxKind.LogicalAndExpression,
-                (ExpressionSyntax)equalityExpression,
-                SyntaxFactory.Token(SyntaxKind.AmpersandAmpersandToken).WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")),
-                (ExpressionSyntax)generator.InvocationExpression(generator.MemberAccessExpression(generator.BaseExpression(), "Equals"), [generator.IdentifierName("other")]).WithLeadingTrivia(SyntaxFactory.Whitespace("\t\t")));
+            equalityExpression = FormatterUtils.FormatBinaryExpression((BinaryExpressionSyntax)generator.LogicalAndExpression(
+                equalityExpression,
+                generator.InvocationExpression(generator.MemberAccessExpression(generator.BaseExpression(), "Equals"), [generator.IdentifierName("other")])));
         }
 
         bool usesEC = false;
@@ -96,11 +94,9 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
                 expression = generator.InvocationExpression(generator.MemberAccessExpression(generator.MemberAccessExpression(generator.MemberAccessExpression(generator.MemberAccessExpression(generator.MemberAccessExpression(generator.IdentifierName("System"), "Collections"), "Generic"), generator.GenericName("EqualityComparer", [generator.TypeExpression(type, false)])), "Default"), "Equals"), [generator.IdentifierName(f.Name), generator.MemberAccessExpression(generator.IdentifierName("other"), f.Name)]);
             }
 
-            equalityExpression = equalityExpression == null ? expression : SyntaxFactory.BinaryExpression(
-                SyntaxKind.LogicalAndExpression,
-                (ExpressionSyntax)equalityExpression,
-                SyntaxFactory.Token(SyntaxKind.AmpersandAmpersandToken).WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")),
-                (ExpressionSyntax)expression.WithLeadingTrivia(SyntaxFactory.Whitespace("\t\t")));
+            equalityExpression = equalityExpression == null ? expression : FormatterUtils.FormatBinaryExpression((BinaryExpressionSyntax)generator.LogicalAndExpression(
+                equalityExpression,
+                expression));
         }
 
         equalityExpression ??= generator.TrueLiteralExpression();
