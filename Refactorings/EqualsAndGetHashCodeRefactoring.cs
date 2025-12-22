@@ -128,14 +128,12 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         else if (hasHashCode)
         {
             // Create hashcode invocation.
-            var prettifyGetHashCode = (!inherited && comparableMembers.Count > 1) || (inherited && comparableMembers.Count > 0);
             List<SyntaxNodeOrToken> arguments = [];
             bool firstMember = !inherited;
 
             if (inherited)
             {
-                arguments.Add(SyntaxFactory.Argument(SyntaxFactory.InvocationExpression(SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.BaseExpression(), SyntaxFactory.IdentifierName("GetHashCode")), SyntaxFactory.ArgumentList()))
-.WithLeadingTrivia(prettifyGetHashCode ? SyntaxFactory.Whitespace("\t\t") : SyntaxFactory.ElasticMarker));
+                arguments.Add(SyntaxFactory.Argument(SyntaxFactory.InvocationExpression(SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.BaseExpression(), SyntaxFactory.IdentifierName("GetHashCode")), SyntaxFactory.ArgumentList())));
             }
 
             foreach (var f in comparableMembers)
@@ -143,20 +141,16 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
                 if (!firstMember)
                 {
                     // Add comma.
-                    var token = SyntaxFactory.Token(SyntaxKind.CommaToken)
-                    .WithTrailingTrivia(prettifyGetHashCode ? SyntaxFactory.EndOfLine("\r\n") : SyntaxFactory.ElasticMarker);
+                    var token = SyntaxFactory.Token(SyntaxKind.CommaToken);
                     arguments.Add(token);
                 }
 
                 firstMember = false;
-                arguments.Add(SyntaxFactory.Argument(SyntaxFactory.IdentifierName(f.Name))
-                .WithLeadingTrivia(prettifyGetHashCode ? SyntaxFactory.Whitespace("\t\t") : SyntaxFactory.ElasticMarker));
+                arguments.Add(SyntaxFactory.Argument(SyntaxFactory.IdentifierName(f.Name)));
             }
 
-            var argumentList = SyntaxFactory.ArgumentList(
-                SyntaxFactory.Token(SyntaxKind.OpenParenToken).WithTrailingTrivia(prettifyGetHashCode ? SyntaxFactory.EndOfLine("\r\n") : SyntaxFactory.ElasticMarker),
-                SyntaxFactory.SeparatedList<ArgumentSyntax>(arguments),
-                SyntaxFactory.Token(SyntaxKind.CloseParenToken));
+            var argumentList = FormatterUtils.FormatFunctionArgumentList(SyntaxFactory.ArgumentList(
+                SyntaxFactory.SeparatedList<ArgumentSyntax>(arguments)));
             hashCodeStatements = new([
                 generator.ReturnStatement(SyntaxFactory.InvocationExpression((MemberAccessExpressionSyntax)generator.MemberAccessExpression(generator.MemberAccessExpression(generator.IdentifierName("System"), "HashCode"), "Combine"), argumentList)),
                 ]);
@@ -173,8 +167,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
             }
             else
             {
-                var tuple = ((TupleExpressionSyntax)generator.TupleExpression(comparableMembers.Select(m => generator.IdentifierName(m.Name))))
-                .WithOpenParenToken(SyntaxFactory.Token(SyntaxKind.OpenParenToken).WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")));
+                var tuple = ((TupleExpressionSyntax)generator.TupleExpression(comparableMembers.Select(m => generator.IdentifierName(m.Name))));
                 var tupleArguments = tuple.Arguments;
 
                 if (inherited)
@@ -182,17 +175,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
                     tupleArguments = tupleArguments.Insert(0, SyntaxFactory.Argument((ExpressionSyntax)generator.InvocationExpression(generator.MemberAccessExpression(generator.BaseExpression(), "GetHashCode"), [])));
                 }
 
-                for (int i = 0; i < tupleArguments.Count; i++)
-                {
-                    tupleArguments = tupleArguments.Replace(tupleArguments[i], tupleArguments[i].WithLeadingTrivia(SyntaxFactory.Whitespace("\t\t")));
-                }
-
-                for (int i = 0; i < tupleArguments.SeparatorCount; i++)
-                {
-                    tupleArguments = tupleArguments.ReplaceSeparator(tupleArguments.GetSeparator(i), SyntaxFactory.Token(SyntaxKind.CommaToken).WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")));
-                }
-
-                tuple = tuple.WithArguments(tupleArguments);
+                tuple = FormatterUtils.FormatTupleExpression(tuple.WithArguments(tupleArguments));
                 hashCodeStatements = new(generator.ReturnStatement(generator.InvocationExpression(generator.MemberAccessExpression(tuple, "GetHashCode"), [])));
             }
         }
