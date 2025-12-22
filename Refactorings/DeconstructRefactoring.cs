@@ -68,8 +68,8 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
         // Compute deconstruct method parameters and assignment expressions based on
         // members associated to primary constructor parameters.
-        var parameterList = new List<SyntaxNode>(_associatedMembers!.Count);
-        var assignments = new List<SyntaxNode>(_associatedMembers!.Count);
+        var parameterList = new SyntaxList<SyntaxNode>();
+        var assignments = new SyntaxList<SyntaxNode>();
         foreach (var m in _associatedMembers!)
         {
             var type = (m as IFieldSymbol)?.Type ?? ((IPropertySymbol)m).Type;
@@ -80,8 +80,8 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
                 isReadOnly = false;
             }
 
-            parameterList.Add(generator.ParameterDeclaration(m.Name, generator.TypeExpression(type), refKind: RefKind.Out));
-            assignments.Add(generator.AssignmentStatement(
+            parameterList = parameterList.Add(generator.ParameterDeclaration(m.Name, generator.TypeExpression(type), refKind: RefKind.Out));
+            assignments = assignments.Add(generator.AssignmentStatement(
                 generator.IdentifierName(m.Name),
                 generator.MemberAccessExpression(generator.ThisExpression(), m.Name)));
         }

@@ -70,11 +70,11 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
             modifiers |= DeclarationModifiers.ReadOnly;
         }
 
-        List<SyntaxNode> statements = [];
+        SyntaxList<SyntaxNode> statements = [];
         if (printableMembers.Count == 0)
         {
             // Just return false or result of base's PrintMembers if inherited.
-            statements.Add(generator.ReturnStatement(
+            statements = statements.Add(generator.ReturnStatement(
                 inherited ? generator.InvocationExpression(
                     generator.MemberAccessExpression(generator.BaseExpression(), "PrintMembers"),
                     [sb]) :
@@ -85,14 +85,14 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
             // If neither inherited nor value type, insert call to EnsureSufficientExecutionStack.
             if (!inherited && !originalRecordSymbol.IsValueType)
             {
-                statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                statements = statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
                     generator.MemberAccessExpression(runtimeHelpers, "EnsureSufficientExecutionStack"))));
             }
 
             // Inherited records call up to base's PrintMembers.
             if (inherited)
             {
-                statements.Add(generator.IfStatement(
+                statements = statements.Add(generator.IfStatement(
                     generator.InvocationExpression(
                         generator.MemberAccessExpression(generator.BaseExpression(), "PrintMembers"),
                         [sb]),
@@ -111,20 +111,20 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
                 if (!firstMember)
                 {
-                    statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                    statements = statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
                         generator.MemberAccessExpression(sb, "Append"),
                         [generator.LiteralExpression(", ")])));
                 }
 
                 firstMember = false;
-                statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                statements = statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
                     generator.MemberAccessExpression(sb, "Append"),
                     [generator.LiteralExpression($"{m.Name} = ")])));
 
                 // Append member value directly, or through ToString if it's a value type.
                 if (memberType.IsValueType)
                 {
-                    statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                    statements = statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
                         generator.MemberAccessExpression(sb, "Append"),
                         [generator.InvocationExpression(
                         generator.MemberAccessExpression(
@@ -133,13 +133,13 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
                 }
                 else
                 {
-                    statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                    statements = statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
                         generator.MemberAccessExpression(sb, "Append"),
                         [generator.MemberAccessExpression(generator.ThisExpression(), m.Name)])));
                 }
             }
 
-            statements.Add(generator.ReturnStatement(generator.TrueLiteralExpression()));
+            statements = statements.Add(generator.ReturnStatement(generator.TrueLiteralExpression()));
         }
 
         // Generate PrintMembers.
