@@ -23,4 +23,26 @@ public static class RecordHelpers
 
     public static bool HasExplicitPrintMembers(ITypeSymbol record, ISymbol stringBuilderSymbol) =>
         GetPrintMembers(record, stringBuilderSymbol).Any(m => m is { IsImplicitlyDeclared: false });
+
+    public static IEnumerable<IMethodSymbol> GetDeconstruct(ITypeSymbol record, IList<IParameterSymbol> primaryConstructorParameters)
+    {
+        // Get all the deconstructs.
+        var candidates = record.GetMembers("Deconstruct")
+            .OfType<IMethodSymbol>()
+            .Where(m => m is { Arity: 0 } &&
+                m.Parameters.Length == primaryConstructorParameters.Count);
+
+        // Return any deconstruct for which parameters are the same order/type/ref kind.
+        foreach (var m in candidates)
+        {
+            if (primaryConstructorParameters.Zip(m.Parameters, (left, right) => (Left: left, Right: right))
+                .All(p => SymbolEqualityComparer.Default.Equals(p.Left.Type, p.Right.Type) && p.Right.RefKind is not RefKind.None))
+            {
+                yield return m;
+            }
+        }
+    }
+
+    public static bool HasExplicitDeconstruct(ITypeSymbol record, IList<IParameterSymbol> primaryConstructorParameters) =>
+        GetDeconstruct(record, primaryConstructorParameters).Any(m => m is { IsImplicitlyDeclared: false });
 }

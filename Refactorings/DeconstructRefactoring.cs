@@ -24,8 +24,6 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
     protected override bool Prepare(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
     {
-        var document = Context.Document;
-
         // Ignore non positional records.
         if (originalRecord.ParameterList is not ParameterListSyntax parameterList || parameterList.Parameters.Count == 0)
         {
@@ -59,13 +57,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         }
 
         // Proper deconstruct depends on the primary constructor, so we need to check if order, type and ref kind of all parameters match expectations.
-        return !originalRecordSymbol.GetMembers(Method)
-            .OfType<IMethodSymbol>()
-            .Where(m => m is { Arity: 0, IsImplicitlyDeclared: false } &&
-                m.Parameters.Length == _parameterSymbols.Count)
-            .Any(
-                m => _parameterSymbols.Zip(m.Parameters, (left, right) => (Left: left, Right: right))
-                .All(p => SymbolEqualityComparer.Default.Equals(p.Left.Type, p.Right.Type) && p.Right.RefKind is not RefKind.None));
+        return !RecordHelpers.HasExplicitDeconstruct(originalRecordSymbol, _parameterSymbols);
     }
 
     protected async override Task<Document> Execute(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
@@ -74,6 +66,8 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         var generator = SyntaxGenerator.GetGenerator(document);
         var isReadOnly = originalRecordSymbol.IsValueType;
 
+        // Compute deconstruct method parameters and assignment expressions based on
+        // members associated to primary constructor parameters.
         var parameterList = new List<SyntaxNode>(_associatedMembers!.Count);
         var assignments = new List<SyntaxNode>(_associatedMembers!.Count);
         foreach (var m in _associatedMembers!)
@@ -82,15 +76,18 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
             if (m is IPropertySymbol { GetMethod.IsReadOnly: false })
             {
+                // Presence of any associated property with non readonly getter makes method non readonly.
                 isReadOnly = false;
             }
 
             parameterList.Add(generator.ParameterDeclaration(m.Name, generator.TypeExpression(type), refKind: RefKind.Out));
-            assignments.Add(generator.AssignmentStatement(generator.IdentifierName(m.Name), generator.MemberAccessExpression(generator.ThisExpression(), m.Name)));
+            assignments.Add(generator.AssignmentStatement(
+                generator.IdentifierName(m.Name),
+                generator.MemberAccessExpression(generator.ThisExpression(), m.Name)));
         }
 
         var deconstruct = generator.MethodDeclaration(
-            "Deconstruct",
+            Method,
             accessibility: Accessibility.Public,
             modifiers: isReadOnly ? DeclarationModifiers.ReadOnly : DeclarationModifiers.None,
             parameters: parameterList,
