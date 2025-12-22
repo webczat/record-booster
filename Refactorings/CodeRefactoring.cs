@@ -20,7 +20,7 @@ public abstract class CodeRefactoring(CodeRefactoringContext context, SyntaxNode
 
     protected SemanticModel SemanticModel { get; } = semanticModel ?? throw new ArgumentNullException(nameof(semanticModel));
 
-    public bool TryRegister(RecordDeclarationSyntax originalRecord, CancellationToken cancellationToken = default)
+    public async Task<bool> TryRegister(RecordDeclarationSyntax originalRecord, CancellationToken cancellationToken = default)
     {
         originalRecord = originalRecord ?? throw new ArgumentNullException(nameof(originalRecord));
 
@@ -32,16 +32,16 @@ public abstract class CodeRefactoring(CodeRefactoringContext context, SyntaxNode
             return false;
         }
 
-        if (!Prepare(originalRecord, originalRecordSymbol))
+        if (!await PrepareAsync(originalRecord, originalRecordSymbol))
         {
             return false;
         }
 
-        Context.RegisterRefactoring(CodeAction.Create(Title, ct => Execute(originalRecord, originalRecordSymbol, ct), Key));
+        Context.RegisterRefactoring(CodeAction.Create(Title, ct => ExecuteAsync(originalRecord, originalRecordSymbol, ct), Key));
         return true;
     }
 
-    protected abstract bool Prepare(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol);
+    protected abstract Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol);
 
-    protected abstract Task<Document> Execute(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default);
+    protected abstract Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default);
 }

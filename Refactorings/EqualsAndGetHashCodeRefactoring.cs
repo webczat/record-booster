@@ -41,7 +41,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
     public override string Title => "Generate default record \"Equals\" and \"GetHashCode\"";
 
-    protected override bool Prepare(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
+    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
     {
         bool hasEquals = originalRecordSymbol.GetMembers(EqualsMethod)
             .Any(m => m is IMethodSymbol { Arity: 0, IsImplicitlyDeclared: false, Parameters: [{ Type: var type, RefKind: RefKind.None }] } &&
@@ -52,7 +52,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         return !hasEquals && !hasGetHashCode;
     }
 
-    protected async override Task<Document> Execute(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
+    protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
     {
         var document = Context.Document;
         var generator = SyntaxGenerator.GetGenerator(document);

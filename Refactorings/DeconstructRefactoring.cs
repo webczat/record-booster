@@ -22,7 +22,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
     public override string Title => "Generate default record \"Deconstruct\"";
 
-    protected override bool Prepare(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
+    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
     {
         // Ignore non positional records.
         if (originalRecord.ParameterList is not ParameterListSyntax parameterList || parameterList.Parameters.Count == 0)
@@ -60,7 +60,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         return !RecordHelpers.HasExplicitDeconstruct(originalRecordSymbol, _parameterSymbols);
     }
 
-    protected async override Task<Document> Execute(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
+    protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
     {
         var document = Context.Document;
         var generator = SyntaxGenerator.GetGenerator(document);

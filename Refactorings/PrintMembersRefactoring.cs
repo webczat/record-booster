@@ -21,7 +21,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
     public override string Title => "Generate default record \"PrintMembers\"";
 
-    protected override bool Prepare(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
+    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
     {
         if (_stringBuilderSymbol is null)
         {
@@ -31,7 +31,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         return !RecordHelpers.HasExplicitPrintMembers(originalRecordSymbol, _stringBuilderSymbol);
     }
 
-    protected async override Task<Document> Execute(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
+    protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
     {
         var document = Context.Document;
         var generator = SyntaxGenerator.GetGenerator(document);

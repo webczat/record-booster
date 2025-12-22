@@ -35,13 +35,13 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
             return;
         }
 
-        _ = new ToStringRefactoring(context, root, semanticModel)
+        _ = await new ToStringRefactoring(context, root, semanticModel)
             .TryRegister(originalRecord);
-        _ = new PrintMembersRefactoring(context, root, semanticModel)
+        _ = await new PrintMembersRefactoring(context, root, semanticModel)
 .TryRegister(originalRecord);
-        _ = new EqualsAndGetHashCodeRefactoring(context, root, semanticModel)
+        _ = await new EqualsAndGetHashCodeRefactoring(context, root, semanticModel)
 .TryRegister(originalRecord);
-        _ = new DeconstructRefactoring(context, root, semanticModel)
+        _ = await new DeconstructRefactoring(context, root, semanticModel)
 .TryRegister(originalRecord);
     }
 
