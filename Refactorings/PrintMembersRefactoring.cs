@@ -28,9 +28,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
             return false;
         }
 
-        return !originalRecordSymbol.GetMembers(Method)
-            .Any(s => s is IMethodSymbol { Parameters: [{ Type: var type, RefKind: RefKind.None }], Arity: 0, IsImplicitlyDeclared: false } &&
-                SymbolEqualityComparer.Default.Equals(type, _stringBuilderSymbol));
+        return !RecordHelpers.HasExplicitPrintMembers(originalRecordSymbol, _stringBuilderSymbol);
     }
 
     protected async override Task<Document> Execute(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
@@ -40,18 +38,31 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
         var stringBuilder = generator.TypeExpression(_stringBuilderSymbol!);
         var sb = generator.IdentifierName("sb");
-        var runtimeHelpers = generator.MemberAccessExpression(generator.MemberAccessExpression(generator.MemberAccessExpression(generator.IdentifierName("System"), "Runtime"), "CompilerServices"), "RuntimeHelpers");
+        var runtimeHelpers = generator.MemberAccessExpression(
+            generator.MemberAccessExpression(
+                generator.MemberAccessExpression(
+                    generator.IdentifierName("System"),
+                    "Runtime"),
+                "CompilerServices"),
+            "RuntimeHelpers");
 
         // Retrieve printable members, being public instance fields and readable properties.
         var printableMembers = originalRecordSymbol.GetMembers()
             .Where(m => m is
                 IFieldSymbol { IsStatic: false, DeclaredAccessibility: Accessibility.Public } or
-                IPropertySymbol { IsStatic: false, DeclaredAccessibility: Accessibility.Public, GetMethod: not null, Parameters.IsDefaultOrEmpty: true, IsIndexer: false })
+                IPropertySymbol
+                {
+                    IsStatic: false, DeclaredAccessibility: Accessibility.Public, GetMethod: not null,
+                    Parameters.IsDefaultOrEmpty: true, IsIndexer: false
+                })
             .ToList();
 
+        // This works because records inherit only from other records or Object.
         var inherited = originalRecordSymbol.BaseType?.IsRecord ?? false;
         var accessibility = originalRecordSymbol.IsSealed && !inherited ? Accessibility.Private : Accessibility.Protected;
-        var modifiers = inherited ? DeclarationModifiers.Override : originalRecordSymbol.IsSealed ? DeclarationModifiers.None : DeclarationModifiers.Virtual;
+        var modifiers = inherited ?
+            DeclarationModifiers.Override :
+            originalRecordSymbol.IsSealed ? DeclarationModifiers.None : DeclarationModifiers.Virtual;
 
         // Structs default to readonly unless non readonly getters detected.
         if (originalRecordSymbol.IsValueType && !printableMembers.Any(m => m is IPropertySymbol { GetMethod.IsReadOnly: false }))
@@ -59,30 +70,76 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
             modifiers |= DeclarationModifiers.ReadOnly;
         }
 
-        // Prepare a list of statements that append members.
-        var firstMember = true;
-        List<SyntaxNode> appendStatements = [];
-        foreach (var m in printableMembers)
+        List<SyntaxNode> statements = [];
+        if (printableMembers.Count == 0)
         {
-            var memberType = (m as IFieldSymbol)?.Type ?? ((IPropertySymbol)m).Type;
-
-            if (!firstMember)
+            // Just return false or result of base's PrintMembers if inherited.
+            statements.Add(generator.ReturnStatement(
+                inherited ? generator.InvocationExpression(
+                    generator.MemberAccessExpression(generator.BaseExpression(), "PrintMembers"),
+                    [sb]) :
+                generator.FalseLiteralExpression()));
+        }
+        else
+        {
+            // If neither inherited nor value type, insert call to EnsureSufficientExecutionStack.
+            if (!inherited && !originalRecordSymbol.IsValueType)
             {
-                appendStatements.Add(generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), [generator.LiteralExpression(", ")])));
+                statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                    generator.MemberAccessExpression(runtimeHelpers, "EnsureSufficientExecutionStack"))));
             }
 
-            firstMember = false;
-            appendStatements.Add(generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), [generator.LiteralExpression($"{m.Name} = ")])));
+            // Inherited records call up to base's PrintMembers.
+            if (inherited)
+            {
+                statements.Add(generator.IfStatement(
+                    generator.InvocationExpression(
+                        generator.MemberAccessExpression(generator.BaseExpression(), "PrintMembers"),
+                        [sb]),
+                    [
+                        generator.ExpressionStatement(generator.InvocationExpression(
+                            generator.MemberAccessExpression(sb, "Append"),
+                            [generator.LiteralExpression(", ")]))
+                ]));
+            }
 
-            // Append member value directly, or through ToString if it's a value type.
-            if (memberType.IsValueType)
+            // Add all printable members.
+            var firstMember = true;
+            foreach (var m in printableMembers)
             {
-                appendStatements.Add(generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), [generator.InvocationExpression(generator.MemberAccessExpression(generator.IdentifierName(m.Name), "ToString"))])));
+                var memberType = (m as IFieldSymbol)?.Type ?? ((IPropertySymbol)m).Type;
+
+                if (!firstMember)
+                {
+                    statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                        generator.MemberAccessExpression(sb, "Append"),
+                        [generator.LiteralExpression(", ")])));
+                }
+
+                firstMember = false;
+                statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                    generator.MemberAccessExpression(sb, "Append"),
+                    [generator.LiteralExpression($"{m.Name} = ")])));
+
+                // Append member value directly, or through ToString if it's a value type.
+                if (memberType.IsValueType)
+                {
+                    statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                        generator.MemberAccessExpression(sb, "Append"),
+                        [generator.InvocationExpression(
+                        generator.MemberAccessExpression(
+                            generator.MemberAccessExpression(generator.ThisExpression(), m.Name),
+                            "ToString"))])));
+                }
+                else
+                {
+                    statements.Add(generator.ExpressionStatement(generator.InvocationExpression(
+                        generator.MemberAccessExpression(sb, "Append"),
+                        [generator.MemberAccessExpression(generator.ThisExpression(), m.Name)])));
+                }
             }
-            else
-            {
-                appendStatements.Add(generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), [generator.IdentifierName(m.Name)])));
-            }
+
+            statements.Add(generator.ReturnStatement(generator.TrueLiteralExpression()));
         }
 
         // Generate PrintMembers.
@@ -92,22 +149,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         returnType: generator.TypeExpression(SpecialType.System_Boolean),
         accessibility: accessibility,
         modifiers: modifiers,
-        statements: [
-            ..(SyntaxNode[])(printableMembers.Count == 0 || inherited || originalRecordSymbol.IsValueType ? [] : [generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(runtimeHelpers, "EnsureSufficientExecutionStack")))]),
-            ..(SyntaxNode[])(!inherited || printableMembers.Count == 0 ? [] : [
-                generator.IfStatement(
-                    generator.InvocationExpression(generator.MemberAccessExpression(generator.BaseExpression(), "PrintMembers"), [sb]),
-                    [
-                        generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), [generator.LiteralExpression(", ")]))
-                ]),
-            ]),
-            ..appendStatements,
-            generator.ReturnStatement(
-                printableMembers.Count == 0 ? (
-                    inherited ? generator.InvocationExpression(generator.MemberAccessExpression(generator.BaseExpression(), "PrintMembers"), [sb]) :
-                    generator.FalseLiteralExpression()) :
-                    generator.TrueLiteralExpression()),
-        ])
+        statements: statements)
         .WithAdditionalAnnotations(Simplifier.Annotation, Simplifier.AddImportsAnnotation, Formatter.Annotation);
 
         var newRecord = generator.AddMembers(originalRecord, printMembers);

@@ -32,16 +32,14 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         }
 
         // Check for existing explicit ToString.
-        return !originalRecordSymbol.GetMembers(Method)
-            .Any(s => s is IMethodSymbol { Parameters: [], Arity: 0, IsImplicitlyDeclared: false });
+        return !RecordHelpers.HasExplicitToString(originalRecordSymbol);
     }
 
     protected async override Task<Document> Execute(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
     {
         var document = Context.Document;
-        var isReadOnly = originalRecordSymbol.IsValueType && originalRecordSymbol.GetMembers("PrintMembers")
-            .Any(m => m is IMethodSymbol { Arity: 0, Parameters: [{ Type: var type }], IsReadOnly: true } method
-            && SymbolEqualityComparer.Default.Equals(type, _stringBuilderSymbol));
+        var isReadOnly = originalRecordSymbol.IsValueType && RecordHelpers.GetPrintMembers(originalRecordSymbol, _stringBuilderSymbol!)
+            .Any(m => m is { IsReadOnly: true });
 
         var generator = SyntaxGenerator.GetGenerator(document);
 
@@ -59,15 +57,26 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
             modifiers: modifiers,
             statements: [
                 generator.LocalDeclarationStatement(stringBuilder, "sb", generator.ObjectCreationExpression(stringBuilder)),
-                generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), generator.NameOfExpression(recordExpression))),
-                generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), generator.LiteralExpression(" { ")))
+                generator.ExpressionStatement(generator.InvocationExpression(
+                    generator.MemberAccessExpression(sb, "Append"),
+                    generator.NameOfExpression(recordExpression))),
+                generator.ExpressionStatement(generator.InvocationExpression(
+                    generator.MemberAccessExpression(sb, "Append"),
+                    generator.LiteralExpression(" { ")))
                 .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed),
                 generator.IfStatement(
-                    generator.InvocationExpression(generator.IdentifierName("PrintMembers"), [sb]),
-                    [generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), generator.LiteralExpression(' ')))])
+                    generator.InvocationExpression(
+                        generator.MemberAccessExpression(generator.ThisExpression(), "PrintMembers"),
+                        [sb]),
+                    [generator.ExpressionStatement(generator.InvocationExpression(
+                        generator.MemberAccessExpression(sb, "Append"),
+                        generator.LiteralExpression(' ')))])
                     .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed),
-                generator.ExpressionStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "Append"), generator.LiteralExpression('}'))),
-                generator.ReturnStatement(generator.InvocationExpression(generator.MemberAccessExpression(sb, "ToString"))),
+                generator.ExpressionStatement(generator.InvocationExpression(
+                    generator.MemberAccessExpression(sb, "Append"),
+                    generator.LiteralExpression('}'))),
+                generator.ReturnStatement(generator.InvocationExpression(
+                    generator.MemberAccessExpression(sb, "ToString"))),
             ])
             .WithAdditionalAnnotations(Simplifier.Annotation, Simplifier.AddImportsAnnotation, Formatter.Annotation);
 
