@@ -45,4 +45,21 @@ public static class RecordHelpers
 
     public static bool HasExplicitDeconstruct(ITypeSymbol record, IList<IParameterSymbol> primaryConstructorParameters) =>
         GetDeconstruct(record, primaryConstructorParameters).Any(m => m is { IsImplicitlyDeclared: false });
+
+    public static IEnumerable<IMethodSymbol> GetEquals(ITypeSymbol record) =>
+        record.GetMembers("Equals")
+            .OfType<IMethodSymbol>()
+            .Where(m => m is { Arity: 0, Parameters: [{ Type: var type, RefKind: RefKind.None }] } &&
+                SymbolEqualityComparer.Default.Equals(type, record));
+
+    public static bool HasExplicitEquals(ITypeSymbol record) =>
+        GetEquals(record).Any(m => m is { IsImplicitlyDeclared: false });
+
+    public static IEnumerable<IMethodSymbol> GetGetHashCode(ITypeSymbol record) =>
+        record.GetMembers("GetHashCode")
+            .OfType<IMethodSymbol>()
+            .Where(m => m is { Arity: 0, Parameters: [] });
+
+    public static bool HasExplicitGetHashCode(ITypeSymbol record) =>
+        GetGetHashCode(record).Any(m => m is { IsImplicitlyDeclared: false });
 }

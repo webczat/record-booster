@@ -41,16 +41,8 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
     public override string Title => "Generate default record \"Equals\" and \"GetHashCode\"";
 
-    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
-    {
-        bool hasEquals = originalRecordSymbol.GetMembers(EqualsMethod)
-            .Any(m => m is IMethodSymbol { Arity: 0, IsImplicitlyDeclared: false, Parameters: [{ Type: var type, RefKind: RefKind.None }] } &&
-                SymbolEqualityComparer.Default.Equals(type, originalRecordSymbol));
-        bool hasGetHashCode = originalRecordSymbol.GetMembers(GetHashCodeMethod)
-            .Any(m => m is IMethodSymbol { Arity: 0, IsImplicitlyDeclared: false, Parameters: [] });
-
-        return !hasEquals && !hasGetHashCode;
-    }
+    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol) =>
+        !RecordHelpers.HasExplicitEquals(originalRecordSymbol) && !RecordHelpers.HasExplicitGetHashCode(originalRecordSymbol);
 
     protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
     {
