@@ -1,1 +1,29 @@
-This project is currently under development. Useful content soon.
+# Introduction
+This repository contains useful roslyn plugins to work with records.
+
+Current contents:
+* Refactorings - to generate explicit versions of implicit record members.
+
+# Refactorings
+This project contains refactorings that explicitly generate record members that are normally implicit.
+They are useful when one needs to replace any of the replaceable implicit members and augment them with custom behavior. In this case, these refactorings provide an useful starting point.
+
+Behavior of explicit members is based on implicitly declared members as defined in the [Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-9.0/records) and [Record structs](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-10.0/record-structs) specifications, however, sometimes an alternative implementation was chosen, mostly for readability purposes.
+
+The following methods can be generated:
+* `Equals` and `GetHashCode`,
+* `Deconstruct` (for positional records),
+* `PrintMembers`,
+* `ToString`.
+
+
+# Building
+Building is straight forward. Generally you can just execute the following command in the root folder:
+```cs
+dotnet build
+```
+
+To run tests, execute:
+```cs
+dotnet test
+```
