@@ -26,6 +26,7 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" />
     </ItemGroup>
     <ItemGroup>
+      <PackageReference Include="System.Formats.Asn1" />
         <ProjectReference Include="../Refactorings/Webczat.RecordBooster.Refactorings.csproj" />
     </ItemGroup>
 </Project>
