@@ -1455,8 +1455,6 @@ public class EqualsAndGetHashCodeTests
         """;
 
         var output = """
-        using System;
-
         public record Base
         {
         }
@@ -1465,13 +1463,12 @@ public class EqualsAndGetHashCodeTests
         {
             public virtual bool Equals(Test? other)
             {
-                return other is not null &&
-                    base.Equals(other);
+                return base.Equals(other);
             }
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(base.GetHashCode());
+                return base.GetHashCode();
             }
         }
         """;
@@ -1506,8 +1503,7 @@ public class EqualsAndGetHashCodeTests
 
             public virtual bool Equals(Test? other)
             {
-                return other is not null &&
-                    base.Equals(other) &&
+                return base.Equals(other) &&
                     _field == other._field;
             }
 
@@ -1545,8 +1541,7 @@ public class EqualsAndGetHashCodeTests
         {
             public virtual bool Equals(Test? other)
             {
-                return other is not null &&
-                    base.Equals(other);
+                return base.Equals(other);
             }
 
             public override int GetHashCode()
@@ -1584,8 +1579,7 @@ public class EqualsAndGetHashCodeTests
 
             public virtual bool Equals(Test? other)
             {
-                return other is not null &&
-                    base.Equals(other) &&
+                return base.Equals(other) &&
                     _field == other._field;
             }
 
@@ -1640,8 +1634,7 @@ public class EqualsAndGetHashCodeTests
 
             public virtual bool Equals(Test? other)
             {
-                return other is not null &&
-                    base.Equals(other) &&
+                return base.Equals(other) &&
                     _field1 == other._field1 &&
                     _field2 == other._field2 &&
                     _field3 == other._field3 &&
@@ -1710,8 +1703,7 @@ public class EqualsAndGetHashCodeTests
 
             public virtual bool Equals(Test? other)
             {
-                return other is not null &&
-                    base.Equals(other) &&
+                return base.Equals(other) &&
                     _field1 == other._field1 &&
                     _field2 == other._field2 &&
                     _field3 == other._field3 &&

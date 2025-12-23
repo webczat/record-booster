@@ -9,10 +9,10 @@ namespace Webczat.RecordBooster.Refactorings;
 
 public static class FormatterUtils
 {
-    public static BinaryExpressionSyntax FormatBinaryExpression(BinaryExpressionSyntax expression) =>
+    public static BinaryExpressionSyntax FormatBinaryExpression(BinaryExpressionSyntax expression, int depth = 2) =>
         expression.WithOperatorToken(expression.OperatorToken
             .WithTrailingTrivia(SyntaxFactory.EndOfLine("\r\n")))
-            .WithRight(expression.Right.WithLeadingTrivia(SyntaxFactory.Whitespace("\t\t")));
+            .WithRight(expression.Right.WithLeadingTrivia(SyntaxFactory.Whitespace(string.Join(string.Empty, Enumerable.Repeat('\t', depth)))));
 
     public static SeparatedSyntaxList<T> FormatArgumentList<T>(SeparatedSyntaxList<T> arguments, int depth = 2)
     where T : SyntaxNode
