@@ -4,6 +4,15 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace>Webczat.RecordBooster.Refactorings</RootNamespace>
         <Description>Record-booster - compiler refactorings for records</Description>
+        <Authors>webczat</Authors>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <DevelopmentDependency>true</DevelopmentDependency>
+        <PackageProjectUrl>https://github.com/webczat/record-booster</PackageProjectUrl>
+        <PackageTags>roslyn;refactorings;records;c#;dotnet</PackageTags>
+        <RepositoryUrl>https://github.com/webczat/record-booster</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <DebugType>embedded</DebugType>
         <GenerateDocumentation>true</GenerateDocumentation>
     </PropertyGroup>
     <ItemGroup>
@@ -14,5 +23,9 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" ExcludeAssets="Runtime"
             PrivateAssets="All" />
         <PackageReference Include="Microsoft.Bcl.Memory" PrivateAssets="All" ExcludeAssets="runtime" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="bin\$(configuration)\$(TargetFramework)\$(assemblyName).dll" Pack="true"
+            PackagePath="analyzers\dotnet\cs\$(assemblyName).dll)" />
     </ItemGroup>
 </Project>
