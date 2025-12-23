@@ -5,7 +5,7 @@ updates:
     directory: /
     package-ecosystem: nuget
     groups:
-      packages:
+      dotnet:
         patterns:
           - "*"
     schedule:
