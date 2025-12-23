@@ -12,7 +12,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="StyleCop.Analyzers" ExcludeAssets="compile" PrivateAssets="all"/>
-        <AdditionalFiles Include="$(MSBuildThisFileDirectory)\stylecop.json"/>
+        <PackageReference Include="StyleCop.Analyzers" ExcludeAssets="compile" PrivateAssets="all" />
+        <AdditionalFiles
+            Include="$([MSBuild]::GetPathOfFileAbove('stylecop.json', $(MSBuildProjectDirectory)))" />
     </ItemGroup>
 </Project>

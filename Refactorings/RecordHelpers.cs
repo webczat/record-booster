@@ -80,8 +80,8 @@ public static class RecordHelpers
     /// <param name="record">The record to introspect.</param>
     /// <param name="expectedParameters">The parameters to match.</param>
     /// <returns><c>true</c> if the record has an explicit <c>Deconstruct</c>, <c>false</c> othervise.</returns>
-    public static bool HasExplicitDeconstruct(ITypeSymbol record, IList<IParameterSymbol> primaryConstructorParameters) =>
-        GetDeconstruct(record, primaryConstructorParameters).Any(m => m is { IsImplicitlyDeclared: false });
+    public static bool HasExplicitDeconstruct(ITypeSymbol record, IList<IParameterSymbol> expectedParameters) =>
+        GetDeconstruct(record, expectedParameters).Any(m => m is { IsImplicitlyDeclared: false });
 
     /// <summary>
     ///  Gets the record's declared <c>Equals</c> methods.
