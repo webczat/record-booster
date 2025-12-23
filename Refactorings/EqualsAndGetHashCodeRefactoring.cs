@@ -232,12 +232,18 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
             // If there are no hash code expressions in the list, just make the method return 0.
             hashCodeStatements = hashCodeStatements.Add(generator.ReturnStatement(generator.LiteralExpression(0)));
         }
+        else if (inherited && hashCodeExpressions.Count == 1)
+        {
+            // Special case, if we inherit from base record and have no members, we can just return the only expression directly as it calls base gethashcode.
+            hashCodeStatements = hashCodeStatements.Add(generator.ReturnStatement(hashCodeExpressions[0]));
+        }
         else if (_hashCodeSymbol is not null)
         {
+            // Add "System" to imported namespaces when System.HashCode is present.
+            _namespacesToImport.Add("System");
             if (hashCodeExpressions.Count > 8)
             {
                 // If there are more than 8 hash code expressions and System.HashCode is available, we need to turn them into HashCode.Add calls.
-                _namespacesToImport.Add("System");
                 hashCodeStatements = hashCodeStatements.Add(generator.LocalDeclarationStatement(
                     generator.TypeExpression(_hashCodeSymbol),
                     "h",
@@ -253,15 +259,9 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
                 hashCodeStatements = hashCodeStatements.Add(generator.ReturnStatement(generator.InvocationExpression(
                     generator.MemberAccessExpression(generator.IdentifierName("h"), "ToHashCode"), [])));
             }
-            else if (inherited && hashCodeExpressions is [SyntaxNode e])
-            {
-                // Special case, if we inherit from base record and have no members, we can just return the expression directly as it calls base gethashcode.
-                hashCodeStatements = hashCodeStatements.Add(generator.ReturnStatement(e));
-            }
             else
             {
                 // If System.HashCode is available and we have less than 8 hash code expressions, turn them into an argument list and invoke HashCode.Combine.
-                _namespacesToImport.Add("System");
                 var combine = (InvocationExpressionSyntax)generator.InvocationExpression(
                     generator.MemberAccessExpression(
                         generator.MemberAccessExpression(generator.IdentifierName("System"), "HashCode"),
@@ -276,12 +276,8 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
             if (hashCodeExpressions is [SyntaxNode e])
             {
                 // If System.HashCode not available and we have only one expression...
-                // Special case, if we inherit from a base record we just use the expression verbatim, othervise we call GetHashCode on it.
-                // It's because in inherit case, the expression already contains explicit GetHashCode call.
-                hashCodeStatements = hashCodeStatements.Add(generator.ReturnStatement(inherited ?
-                    e :
-                    generator.InvocationExpression(
-                        generator.MemberAccessExpression(e, "GetHashCode"), [])));
+                hashCodeStatements = hashCodeStatements.Add(generator.ReturnStatement(generator.InvocationExpression(
+                    generator.MemberAccessExpression(e, "GetHashCode"), [])));
             }
             else
             {
