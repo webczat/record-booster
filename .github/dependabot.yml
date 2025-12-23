@@ -1,0 +1,8 @@
+version: 2
+updates:
+  - assignees:
+      - webczat
+    directory: /
+    package-ecosystem: nuget
+    schedule:
+      interval: weekly
