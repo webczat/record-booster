@@ -4,5 +4,9 @@ updates:
       - webczat
     directory: /
     package-ecosystem: nuget
+    groups:
+      packages:
+        patterns:
+          - "*"
     schedule:
       interval: weekly
