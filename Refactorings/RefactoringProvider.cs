@@ -11,9 +11,22 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Webczat.RecordBooster.Refactorings;
 
+/// <summary>
+///  Provides record related refactorings to the IDE.
+/// </summary>
 [ExportCodeRefactoringProvider(LanguageNames.CSharp)]
 public sealed class RefactoringProvider : CodeRefactoringProvider
 {
+    /// <summary>
+    /// Computes and registers applicable refactorings for given context.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Note that no refactoring will be registered if given type is not a record.
+    /// </para>
+    /// </remarks>
+    /// <param name="context">The refactoring context describing location where quick fix was invoked.</param>
+    /// <returns>A task that completes when refactorings are registered.</returns>
     public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
     {
         var cancellationToken = context.CancellationToken;
@@ -36,15 +49,16 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         }
 
         _ = await new ToStringRefactoring(context, root, semanticModel)
-            .TryRegister(originalRecord);
+            .TryRegisterAsync(originalRecord);
         _ = await new PrintMembersRefactoring(context, root, semanticModel)
-.TryRegister(originalRecord);
+.TryRegisterAsync(originalRecord);
         _ = await new EqualsAndGetHashCodeRefactoring(context, root, semanticModel)
-.TryRegister(originalRecord);
+.TryRegisterAsync(originalRecord);
         _ = await new DeconstructRefactoring(context, root, semanticModel)
-.TryRegister(originalRecord);
+.TryRegisterAsync(originalRecord);
     }
 
+    // Gets the type that is to be affected by refactorings.
     private static TypeDeclarationSyntax? GetType(SyntaxNode root, TextSpan span, SourceText text)
     {
         // Find on what node we're standing.
@@ -66,6 +80,7 @@ public sealed class RefactoringProvider : CodeRefactoringProvider
         return member as TypeDeclarationSyntax;
     }
 
+    // Check whether cursor/selection is between given members.
     private static bool IsBetweenMembers(MemberDeclarationSyntax member, TextSpan span, SourceText text)
     {
         // We assume being between members when we're on a blank line between member declarations.

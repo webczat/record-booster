@@ -10,19 +10,34 @@ using Microsoft.CodeAnalysis.Simplification;
 
 namespace Webczat.RecordBooster.Refactorings;
 
+/// <summary>
+/// This refactoring generates the <c>Deconstruct</c> method similar to one that is implicitly declared for each positional record.
+/// </summary>
+/// <param name="context">The refactoring context.</param>
+/// <param name="syntaxRoot">The refactored document's syntax root.</param>
+/// <param name="semanticModel">The refactored document's semantic model.</param>
 public sealed class DeconstructRefactoring(CodeRefactoringContext context, SyntaxNode syntaxRoot, SemanticModel semanticModel) :
 CodeRefactoring(context, syntaxRoot, semanticModel)
 {
+    /// <summary>
+    /// The generated method name.
+    /// </summary>
     public const string Method = "Deconstruct";
 
+    // A list of primary constructor parameters.
     private IList<IParameterSymbol>? _parameterSymbols;
+
+    // A list of members associated with primary constructor parameters.
     private IList<ISymbol>? _associatedMembers;
 
+    /// <inheritdoc/>
     public override string Key => "Deconstruct";
 
+    /// <inheritdoc/>
     public override string Title => "Generate default record \"Deconstruct\"";
 
-    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
+    /// <inheritdoc/>
+    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken)
     {
         // Ignore non positional records.
         if (originalRecord.ParameterList is not ParameterListSyntax parameterList || parameterList.Parameters.Count == 0)
@@ -60,7 +75,8 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         return !RecordHelpers.HasExplicitDeconstruct(originalRecordSymbol, _parameterSymbols);
     }
 
-    protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
+    /// <inheritdoc/>
+    protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken)
     {
         var document = Context.Document;
         var generator = SyntaxGenerator.GetGenerator(document);

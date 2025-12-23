@@ -11,12 +11,26 @@ using Microsoft.CodeAnalysis.Simplification;
 
 namespace Webczat.RecordBooster.Refactorings;
 
+/// <summary>
+/// This refactoring generates <c>Equals</c> and <c>GetHashCode</c> methods equivalent to implicitly declared ones, if not already present.
+/// </summary>
+/// <param name="context">The refactoring context.</param>
+/// <param name="syntaxRoot">The refactored document's syntax root.</param>
+/// <param name="semanticModel">The refactored document's semantic model.</param>
 public sealed class EqualsAndGetHashCodeRefactoring(CodeRefactoringContext context, SyntaxNode syntaxRoot, SemanticModel semanticModel) :
 CodeRefactoring(context, syntaxRoot, semanticModel)
 {
+    /// <summary>
+    /// The name of Equals method.
+    /// </summary>
     public const string EqualsMethod = "Equals";
+
+    /// <summary>
+    /// The name of GetHashCode method.
+    /// </summary>
     public const string GetHashCodeMethod = "GetHashCode";
 
+    // A list of builtin c# types.
     private static readonly SpecialType[] BuiltinTypes = [
     SpecialType.System_Object,
         SpecialType.System_String,
@@ -37,21 +51,29 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         SpecialType.System_UIntPtr,
     ];
 
+    // List of namespaces to import.
     private readonly IList<string> _namespacesToImport = [];
 
+    // Depth of indentation used for manual formatting routines, defaults to 2 (meaning two tab stops).
     private int _formatDepth = 2;
 
+    // Symbol representing System.HashCode struct, if any.
     private ITypeSymbol? _hashCodeSymbol;
 
+    // The symbol representing implicit or explicit EqualityContract property, if any.
     private ISymbol? _equalityContractSymbol;
 
+    // Members that will be compared.
     private IList<ISymbol> _comparableMembers = [];
 
+    /// <inheritdoc/>
     public override string Key => "EqualsAndGetHashCode";
 
+    /// <inheritdoc/>
     public override string Title => "Generate default record \"Equals\" and \"GetHashCode\"";
 
-    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
+    /// <inheritdoc/>
+    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken)
     {
         _hashCodeSymbol = SemanticModel.Compilation.GetTypeByMetadataName("System.HashCode");
         _equalityContractSymbol = originalRecordSymbol.GetMembers("EqualityContract").SingleOrDefault(m => m is IPropertySymbol);
@@ -77,7 +99,8 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         return !RecordHelpers.HasExplicitEquals(originalRecordSymbol) && !RecordHelpers.HasExplicitGetHashCode(originalRecordSymbol);
     }
 
-    protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
+    /// <inheritdoc/>
+    protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken)
     {
         var document = Context.Document;
         var generator = SyntaxGenerator.GetGenerator(document);
@@ -94,11 +117,13 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         return newDocument;
     }
 
+    // Retrieves syntax for member access to a given instantiation of EqualityComparer<T>.
     private static SyntaxNode GetEqualityComparerFor(SyntaxGenerator generator, SyntaxNode typeArgument) =>
         generator.MemberAccessExpression(
             generator.MemberAccessExpression(generator.MemberAccessExpression(generator.IdentifierName("System"), "Collections"), "Generic"),
             generator.GenericName("EqualityComparer", [typeArgument]));
 
+    // Adds namespace to list of to be imported namespaces if it doesn't already exist.
     private void AddNamespace(string @namespace)
     {
         if (!_namespacesToImport.Contains(@namespace))
@@ -107,6 +132,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         }
     }
 
+    // Generates and returns the Equals method.
     private SyntaxNode GenerateEquals(SyntaxGenerator generator, ITypeSymbol originalRecordSymbol, bool inherited)
     {
         // Construct a list of expressions that constitute the equality expression.
@@ -206,6 +232,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         return equals;
     }
 
+    // Generates and returns the GetHashCode method.
     private SyntaxNode GenerateGetHashCode(SyntaxGenerator generator, ITypeSymbol originalRecordSymbol, bool inherited)
     {
         // Create a list of hash code expressions.
@@ -314,6 +341,8 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         return getHashCode;
     }
 
+    // Adds given namespace imports if imports not already present.
+    // Useful for namespace imports that are not added by AddImports annotation.
     private SyntaxNode AddImports(SyntaxGenerator generator, SyntaxNode root, SyntaxNode record, CancellationToken cancellationToken)
     {
         // Note that we need to use root parameter instead of SyntaxRoot as it's the updated root.

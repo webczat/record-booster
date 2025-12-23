@@ -13,18 +13,31 @@ using Microsoft.CodeAnalysis.Simplification;
 
 namespace Webczat.RecordBooster.Refactorings;
 
+/// <summary>
+/// This refactoring generates a <c>ToString</c> method equivalent to the implicitly declared one, if not already present.
+/// </summary>
+/// <param name="context">The refactoring context.</param>
+/// <param name="syntaxRoot">The refactored document's syntax root.</param>
+/// <param name="semanticModel">The refactored document's semantic model.</param>
 public sealed class ToStringRefactoring(CodeRefactoringContext context, SyntaxNode syntaxRoot, SemanticModel semanticModel) :
 CodeRefactoring(context, syntaxRoot, semanticModel)
 {
+    /// <summary>
+    /// Name of method to generate.
+    /// </summary>
     public const string Method = "ToString";
 
+    // The string builder symbol.
     private readonly ITypeSymbol? _stringBuilderSymbol = semanticModel.Compilation.GetTypeByMetadataName("System.Text.StringBuilder");
 
+    /// <inheritdoc/>
     public override string Key => "ToString";
 
+    /// <inheritdoc/>
     public override string Title => "Generate default record \"ToString\"";
 
-    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol)
+    /// <inheritdoc/>
+    protected async override Task<bool> PrepareAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken)
     {
         if (_stringBuilderSymbol is null)
         {
@@ -35,7 +48,8 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         return !RecordHelpers.HasExplicitToString(originalRecordSymbol);
     }
 
-    protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken = default)
+    /// <inheritdoc/>
+    protected async override Task<Document> ExecuteAsync(RecordDeclarationSyntax originalRecord, ITypeSymbol originalRecordSymbol, CancellationToken cancellationToken)
     {
         var document = Context.Document;
         var isReadOnly = originalRecordSymbol.IsValueType && RecordHelpers.GetPrintMembers(originalRecordSymbol, _stringBuilderSymbol!)
