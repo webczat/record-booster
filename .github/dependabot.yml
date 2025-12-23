@@ -10,3 +10,12 @@ updates:
           - "*"
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "Microsoft.CodeAnalysis.CSharp"
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
+      - dependency-name: "Microsoft.CodeAnalysis.CSharp.Workspaces"
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
