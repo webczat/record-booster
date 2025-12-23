@@ -1,6 +1,7 @@
 <Project>
     <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
     <PropertyGroup>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ImplicitUsings>true</ImplicitUsings>
         <Nullable>enable</Nullable>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
