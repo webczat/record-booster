@@ -120,9 +120,9 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
                 SyntaxFactory.UnaryPattern(SyntaxFactory.ConstantPattern((ExpressionSyntax)generator.NullLiteralExpression()))));
         }
 
-        // If we inherit from another record, call base Equals.
         if (inherited)
         {
+            // If we inherit from another record, call base Equals.
             equalityExpressions = equalityExpressions.Add(generator.InvocationExpression(
                 generator.MemberAccessExpression(generator.BaseExpression(), "Equals"),
                 [generator.IdentifierName("other")]));
@@ -143,10 +143,12 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
 
             // Builtin types, enums and types overriding the equality operators will be compared using ==.
             // Note it's an intentional deviation from spec for readability purposes.
-            if (BuiltinTypes.Contains(type.SpecialType) || type.TypeKind is TypeKind.Enum | type.GetMembers(WellKnownMemberNames.EqualityOperatorName)
-            .Any(m => m is IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator or MethodKind.BuiltinOperator, Parameters: [{ Type: var t1 }, { Type: var t2 }] } &&
-                SymbolEqualityComparer.Default.Equals(t1, t2) &&
-                SymbolEqualityComparer.Default.Equals(t1, type)))
+            if (BuiltinTypes.Contains(type.SpecialType) || type.TypeKind is TypeKind.Enum |
+                type.GetMembers(WellKnownMemberNames.EqualityOperatorName)
+                .Any(m => m is IMethodSymbol
+                { MethodKind: MethodKind.UserDefinedOperator or MethodKind.BuiltinOperator, Parameters: [{ Type: var t1 }, { Type: var t2 }] } &&
+                    SymbolEqualityComparer.Default.Equals(t1, t2) &&
+                    SymbolEqualityComparer.Default.Equals(t1, type)))
             {
                 equalityExpressions = equalityExpressions.Add(generator.ValueEqualsExpression(
                     generator.MemberAccessExpression(generator.ThisExpression(), f.Name),
@@ -182,6 +184,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
                     _formatDepth));
 
         // Create equals method.
+        var originalRecordType = generator.TypeExpression(originalRecordSymbol);
         var modifiers = originalRecordSymbol.IsValueType ?
             DeclarationModifiers.ReadOnly :
             originalRecordSymbol.IsSealed ? DeclarationModifiers.None : DeclarationModifiers.Virtual;
@@ -190,7 +193,11 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
             accessibility: Accessibility.Public,
             modifiers: modifiers,
             returnType: generator.TypeExpression(SpecialType.System_Boolean),
-            parameters: [generator.ParameterDeclaration("other", originalRecordSymbol.IsValueType ? generator.TypeExpression(originalRecordSymbol) : generator.NullableTypeExpression(generator.TypeExpression(originalRecordSymbol)))],
+            parameters: [
+                generator.ParameterDeclaration(
+                    "other",
+                    originalRecordSymbol.IsValueType ? originalRecordType : generator.NullableTypeExpression(originalRecordType))
+                    ],
             statements: [
                 generator.ReturnStatement(equalityExpression),
             ])
@@ -205,9 +212,9 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         // They will be turned into contents of GetHashCode later.
         SyntaxList<SyntaxNode> hashCodeExpressions = [];
 
-        // If record inherits from another record,, call up to GetHashCode of the base.
         if (inherited)
         {
+            // If record inherits from another record,, call up to GetHashCode of the base.
             hashCodeExpressions = hashCodeExpressions.Add(generator.InvocationExpression(
                 generator.MemberAccessExpression(generator.BaseExpression(), "GetHashCode")));
         }
@@ -241,6 +248,7 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
         {
             // Add "System" to imported namespaces when System.HashCode is present.
             _namespacesToImport.Add("System");
+
             if (hashCodeExpressions.Count > 8)
             {
                 // If there are more than 8 hash code expressions and System.HashCode is available, we need to turn them into HashCode.Add calls.

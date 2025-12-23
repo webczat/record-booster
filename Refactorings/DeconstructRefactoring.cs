@@ -80,7 +80,10 @@ CodeRefactoring(context, syntaxRoot, semanticModel)
                 isReadOnly = false;
             }
 
-            parameterList = parameterList.Add(generator.ParameterDeclaration(m.Name, generator.TypeExpression(type), refKind: RefKind.Out));
+            parameterList = parameterList.Add(generator.ParameterDeclaration(
+                m.Name,
+                generator.TypeExpression(type),
+                refKind: RefKind.Out));
             assignments = assignments.Add(generator.AssignmentStatement(
                 generator.IdentifierName(m.Name),
                 generator.MemberAccessExpression(generator.ThisExpression(), m.Name)));

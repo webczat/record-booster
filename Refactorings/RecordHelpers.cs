@@ -26,7 +26,7 @@ public static class RecordHelpers
 
     public static IEnumerable<IMethodSymbol> GetDeconstruct(ITypeSymbol record, IList<IParameterSymbol> primaryConstructorParameters)
     {
-        // Get all the deconstructs.
+        // Get all the deconstructs with correct parameter count.
         var candidates = record.GetMembers("Deconstruct")
             .OfType<IMethodSymbol>()
             .Where(m => m is { Arity: 0 } &&
