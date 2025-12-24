@@ -22,6 +22,7 @@ Building is straight forward. Generally you can just execute the following comma
 ```cs
 dotnet build
 ```
+Note that building the project requires minimum .NET version 8.0.
 
 To run tests, execute:
 ```cs
