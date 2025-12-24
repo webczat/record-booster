@@ -9,6 +9,7 @@
         <DisableRuntimeMarshalling>true</DisableRuntimeMarshalling>
         <Deterministic>true</Deterministic>
         <LangVersion>latest</LangVersion>
+        <NoWarn>CS1998</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
