@@ -14,6 +14,8 @@
 
     <ItemGroup>
         <PackageReference Include="StyleCop.Analyzers" ExcludeAssets="compile" PrivateAssets="all" />
+        <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="All"
+            ExcludeAssets="Compile" />
         <AdditionalFiles
             Include="$([MSBuild]::GetPathOfFileAbove('stylecop.json', $(MSBuildProjectDirectory)))" />
     </ItemGroup>
