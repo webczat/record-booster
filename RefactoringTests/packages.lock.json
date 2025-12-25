@@ -49,12 +49,6 @@
           "Microsoft.TestPlatform.TestHost": "18.0.1"
         }
       },
-      "Nerdbank.GitVersioning": {
-        "type": "Direct",
-        "requested": "[3.9.50, )",
-        "resolved": "3.9.50",
-        "contentHash": "HtOgGF6jZ+WYbXnCUCYPT8Y2d6mIJo9ozjK/FINTRsXdm4Zgv9GehUMa7EFoGQkqrMcDJNOIDwCmENnvXg4UbA=="
-      },
       "StyleCop.Analyzers": {
         "type": "Direct",
         "requested": "[1.2.0-beta.556, )",

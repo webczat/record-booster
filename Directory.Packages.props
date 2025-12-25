@@ -17,6 +17,5 @@
         <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing"
             Version="1.1.2" />
         <PackageVersion Include="Microsoft.Bcl.Memory" Version="10.0.1" />
-        <PackageVersion Include="Nerdbank.GitVersioning" Version="3.9.50" />
     </ItemGroup>
 </Project>
