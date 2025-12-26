@@ -1,0 +1,72 @@
+workflow: ""
+assembly-file-versioning-scheme: MajorMinorPatch
+assembly-versioning-scheme: Major
+commit-date-format: yyyy-MM-dd
+commit-message-incrementing: Enabled
+major-version-bump-message: \\+semver:\\s?(breaking|major)
+minor-version-bump-message: \\+semver:\\s?(feature|minor)
+patch-version-bump-message: \\+semver:\\s?(fix|patch)
+no-bump-message: \\+semver:\\s?(none|skip)
+update-build-number: true
+version-in-branch-pattern: (?<version>[vV]?\\d+(\\.\\d+)?(\\.\\d+)?).*
+tag-pre-release-weight: 60000
+tag-prefix: "[vV]?"
+semantic-version-format: Strict
+
+mode: ContinuousDelivery
+increment: Inherit
+label: "{BranchName}"
+regex: ""
+prevent-increment:
+  of-merged-branch: false
+  when-branch-merged: false
+  when-current-commit-tagged: true
+is-main-branch: false
+is-release-branch: false
+track-merge-message: false
+track-merge-target: false
+tracks-release-branches: false
+source-branches: []
+is-source-branch-for: []
+
+strategies:
+  - Fallback
+  - ConfiguredNextVersion
+  - MergeMessage
+  - TaggedCommit
+  - TrackReleaseBranches
+  - VersionInBranchName
+
+branches:
+  main:
+    regex: ^main$
+    label: preview
+    increment: Patch
+    pre-release-weight: 0
+    is-main-branch: true
+    is-release-branch: false
+    tracks-release-branches: false
+    track-merge-message: true
+    track-merge-target: false
+  pr:
+    regex: "^pull/(?<Number>\\d*)"
+    mode: ContinuousDelivery
+    increment: Inherit
+    label: "pr{Number}"
+    prevent-increment:
+      when-current-commit-tagged: false
+      of-merged-branch: true
+    track-merge-message: true
+    source-branches:
+      - main
+      - unknown
+  unknown:
+    regex: ^(?<BranchName>.+)$
+    label: "{BranchName}"
+    increment: Inherit
+    mode: ManualDeployment
+    prevent-increment:
+      when-current-commit-tagged: true
+    source-branches:
+      - main
+      - pr
