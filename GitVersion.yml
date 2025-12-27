@@ -3,3 +3,5 @@ assembly-versioning-scheme: MajorMinor
 branches:
   main:
     label: preview
+  pull-request:
+    label: "pr{Number}"
