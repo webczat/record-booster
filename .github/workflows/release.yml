@@ -7,9 +7,3 @@ jobs:
   release:
     runs-on: ubuntu-latest
     name: Release
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
