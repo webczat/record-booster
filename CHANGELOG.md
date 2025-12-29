@@ -3,5 +3,5 @@ This file documents all the changes in this project. This project adheres to sem
 
 ## [Unreleased]
 
-## [1.0.0] 2025-12-29
+## [1.0.0] 2025-12-30
 Initial release.
