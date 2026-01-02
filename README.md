@@ -16,6 +16,10 @@ The following methods can be generated:
 * `PrintMembers`,
 * `ToString`.
 
+# Development environment setup
+The recommended development environment is (Visual Studio Code)[https://code.visualstudio.com/]) code editor with `devcontainers` extensions installed.
+
+This repository contains a devcontainer configuration and using a devcontainer is recommended. If you don't plan to using a devcontainer, you can install recommended extensions from marketplace.
 
 # Building
 Building is straight forward. Generally you can just execute the following command in the root folder:
