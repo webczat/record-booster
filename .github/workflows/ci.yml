@@ -1,0 +1,20 @@
+name: Continuous integration
+permissions: {}
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+        with:
+          fetch-depth: 0
+      - name: Setup gitversion
+        uses: gittools/actions/gitversion/setup@v4.2.0
