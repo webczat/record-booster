@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(fromJSON('["failure", "success", "neutral"]'), github.event.workflow_run.conclusion)
     permissions:
-      checks: write
+      checks: read
       contents: read
       actions: read
     steps:
