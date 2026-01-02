@@ -34,4 +34,3 @@ jobs:
         uses: gittools/actions/gitversion/execute@v4.2.0
         with:
           updateProjectFiles: true
-      - run: cat RefactoringTests/*.csproj
