@@ -32,3 +32,32 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
           token: ${{secrets.GITHUB_TOKEN}}
+
+  publish-packages:
+    name: Publish packages
+    runs-on: ubuntu-latest
+    if: contains(fromJSON('["success", "neutral"]'), github.event.workflow_run.conclusion)
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+      - name: Setup .NET sdk
+        uses: actions/setup-dotnet@v5.0.1
+        with:
+          dotnet-version: 8.0.x
+      - name: Download packages
+        uses: actions/download-artifact@v7.0.0
+        with:
+          run-id: ${{github.event.workflow_run.id}}
+          name: packages
+          path: packages
+          github-token: ${{secrets.GITHUB_TOKEN}}
+      - name: Publish packages
+        env:
+          TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          for PKG in packages/*.nupkg; do
+            dotnet nuget push --skip-duplicate -k "$TOKEN" $PKG
+          done
