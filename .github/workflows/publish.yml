@@ -32,3 +32,4 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
           token: ${{secrets.GITHUB_TOKEN}}
+          use-actions-summary: false
