@@ -6,7 +6,6 @@
         <Description>Tests for RecordBooster</Description>
         <!-- Tests are not packable. -->
         <IsPackable>false</IsPackable>
-        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     </PropertyGroup>
     <ItemGroup>
@@ -22,11 +21,12 @@
         <PackageReference Include="xunit.v3" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="All" ExcludeAssets="compile;runtime" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="All"
+            ExcludeAssets="compile;runtime" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" />
+        <PackageReference Include="System.Formats.Asn1" />
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="System.Formats.Asn1" />
         <ProjectReference Include="../Refactorings/Webczat.RecordBooster.Refactorings.csproj" />
     </ItemGroup>
 </Project>
