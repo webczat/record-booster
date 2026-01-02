@@ -19,3 +19,13 @@ updates:
         update-types:
           - version-update:semver-major
           - version-update:semver-minor
+  - assignees:
+      - webczat
+    directory: /
+    package-ecosystem: github-actions
+    groups:
+      actions:
+        patterns:
+          - "*"
+    schedule:
+      interval: weekly
