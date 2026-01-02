@@ -30,7 +30,6 @@ jobs:
           name: Test results
           path: "**/test-results/*.trx"
           reporter: dotnet-trx
-          fail-on-error: false
           token: ${{secrets.GITHUB_TOKEN}}
 
   publish-packages:
