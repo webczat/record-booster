@@ -1,0 +1,29 @@
+name: Publish build results
+permissions: {}
+on:
+  workflow_run:
+    types: completed
+    workflows:
+      - Continuous integration
+
+jobs:
+  publish-test-results:
+    name: Publish test results
+    runs-on: ubuntu-latest
+    if: contains(fromJSON('["failure", "success", "neutral"]'), github.event.workflow_run.conclusion)
+    permissions:
+      checks: write
+    steps:
+      - name: Download test results
+        uses: actions/download-artifact@v7.0.0
+        with:
+          run-id: ${{github.event.workflow_run.id}}
+          name: test-results
+          github-token: ${{secrets.GITHUB_TOKEN}}
+      - name: Publish test results
+        uses: phoenix-actions/test-reporting@v15
+        with:
+          name: Test results
+          path: "**/test-results/*.trx"
+          reporter: dotnet-trx
+          fail-on-error: false
