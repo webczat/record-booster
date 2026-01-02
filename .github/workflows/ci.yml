@@ -40,7 +40,7 @@ jobs:
       - name: Test
         run: dotnet test --no-build -- --results-directory test-results --report-xunit-trx
       - name: Package
-        run: dotnet pack --no-build -o packages
+        run: dotnet pack --no-restore -o packages
       - name: Upload packages
         uses: actions/upload-artifact@v6.0.0
         with:
