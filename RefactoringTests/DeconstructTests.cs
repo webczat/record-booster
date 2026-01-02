@@ -643,7 +643,7 @@ public class DeconstructTests
             public void Deconstruct(out int Prop, out int Prop2)
             {
                 Prop = this.Prop;
-                Prop2 = this.Prop2
+                Prop2 = this.Prop2;
             }
         }
         """;
