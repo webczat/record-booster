@@ -17,11 +17,11 @@ public class DeconstructTests
     [InlineData("$$public interface X { }")]
     [InlineData("$$public record X { }")]
     [InlineData("$$public record struct X { }")]
-    public Task DeconstructRefactoring_DoesNotAppear_NotPositionalRecord(string input) =>
-    Verify.VerifyRefactoringAsync(input, input);
+    public async Task DeconstructRefactoring_DoesNotAppear_NotPositionalRecord(string input) =>
+    await Verify.VerifyRefactoringAsync(input, input);
 
     [Fact]
-    public Task DeconstructRefactoring_DoesNotAppear_DeconstructPresent()
+    public async Task DeconstructRefactoring_DoesNotAppear_DeconstructPresent()
     {
         var input = """
         $$public record Test(int Property)
@@ -33,7 +33,7 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, input);
+        await Verify.VerifyRefactoringAsync(input, input);
     }
 
     [Theory]
@@ -67,8 +67,8 @@ public class DeconstructTests
     [InlineData("""
     public record Test($$int I, int J, int K);
     """)]
-    public Task DeconstructRefactoring_DoesNotAppear_CursorInMembers(string input) =>
-    Verify.VerifyRefactoringAsync(input, input);
+    public async Task DeconstructRefactoring_DoesNotAppear_CursorInMembers(string input) =>
+    await Verify.VerifyRefactoringAsync(input, input);
 
     [Theory]
     [InlineData("""
@@ -127,7 +127,7 @@ public class DeconstructTests
         
     }|]
     """)]
-    public Task DeconstructRefactoring_GeneratesMethod_CursorOnTypeAndNoMembers(string input)
+    public async Task DeconstructRefactoring_GeneratesMethod_CursorOnTypeAndNoMembers(string input)
     {
         var output = """
         public record Test(int Prop)
@@ -139,7 +139,7 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -224,7 +224,7 @@ public class DeconstructTests
 
     }|]
     """)]
-    public Task DeconstructRefactoring_GeneratesMethod_CursorOnTypeAndSingleMember(string input)
+    public async Task DeconstructRefactoring_GeneratesMethod_CursorOnTypeAndSingleMember(string input)
     {
         var output = """
         public record Test(int Prop)
@@ -240,7 +240,7 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -354,7 +354,7 @@ public class DeconstructTests
 
     }|]
     """)]
-    public Task DeconstructRefactoring_GeneratesMethod_CursorOnTypeAndTwoMembers(string input)
+    public async Task DeconstructRefactoring_GeneratesMethod_CursorOnTypeAndTwoMembers(string input)
     {
         var output = """
         public record Test(int Prop)
@@ -372,7 +372,7 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -381,7 +381,7 @@ public class DeconstructTests
     [InlineData("public void Deconstruct(int Prop1, out int Prop2)")]
     [InlineData("public void Deconstruct(out string Prop1, out int Prop2)")]
     [InlineData("public void Deconstruct(out int Prop1, out int Prop2, out int Prop3)")]
-    public Task DeconstructRefactoring_GeneratesMethod_OtherDeconstructOverloadsPresent(string overload)
+    public async Task DeconstructRefactoring_GeneratesMethod_OtherDeconstructOverloadsPresent(string overload)
     {
         var input = $$"""
         using System;
@@ -413,11 +413,11 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task DeconstructRefactoring_GeneratesMethodInOuter_NestedRecordsAndCursorBeforeInner()
+    public async Task DeconstructRefactoring_GeneratesMethodInOuter_NestedRecordsAndCursorBeforeInner()
     {
         var input = """
         public record Outer(int Prop)
@@ -446,11 +446,11 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task DeconstructRefactoring_GeneratesMethodInInner_NestedRecordsAndCursorOnInner()
+    public async Task DeconstructRefactoring_GeneratesMethodInInner_NestedRecordsAndCursorOnInner()
     {
         var input = """
         public record Outer(int Prop)
@@ -478,11 +478,11 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task DeconstructRefactoring_GeneratesMethodWithParamsFromPrimaryConstructor_MultipleParameters()
+    public async Task DeconstructRefactoring_GeneratesMethodWithParamsFromPrimaryConstructor_MultipleParameters()
     {
         var input = "$$public record Test(int Prop1, int Prop2, int Prop3);";
 
@@ -498,11 +498,11 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task DeconstructRefactoring_GeneratesMethod_ParamWithExplicitlyDeclaredProperty()
+    public async Task DeconstructRefactoring_GeneratesMethod_ParamWithExplicitlyDeclaredProperty()
     {
         var input = """
         $$public record Test(int Prop)
@@ -523,11 +523,11 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task DeconstructRefactoring_GeneratesMethod_ParamWithExplicitlyDeclaredField()
+    public async Task DeconstructRefactoring_GeneratesMethod_ParamWithExplicitlyDeclaredField()
     {
         var input = """
         $$public record Test(int Prop)
@@ -548,11 +548,11 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task DeconstructRefactoring_GeneratesMethodWithNullableParam_NullablePrimaryConstructorParam()
+    public async Task DeconstructRefactoring_GeneratesMethodWithNullableParam_NullablePrimaryConstructorParam()
     {
         var input = """
         $$public record Test(string? Prop)
@@ -570,11 +570,11 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task DeconstructRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyPositionalProps()
+    public async Task DeconstructRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyPositionalProps()
     {
         var input = """
         $$public record struct Test(int Prop)
@@ -595,11 +595,11 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task DeconstructRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyPositionalPropsAndNonReadonlyOtherMembers()
+    public async Task DeconstructRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyPositionalPropsAndNonReadonlyOtherMembers()
     {
         var input = """
         $$public record struct Test(int Prop)
@@ -620,11 +620,11 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task DeconstructRefactoring_GeneratesNonReadonlyMethod_RecordStructWithNonReadonlyAndReadonlyPositionalProps()
+    public async Task DeconstructRefactoring_GeneratesNonReadonlyMethod_RecordStructWithNonReadonlyAndReadonlyPositionalProps()
     {
         var input = """
         $$public record struct Test(int Prop, int Prop2)
@@ -648,6 +648,6 @@ public class DeconstructTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 }

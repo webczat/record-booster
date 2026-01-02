@@ -15,11 +15,11 @@ public class ToStringTests
     [InlineData("$$public struct X { }")]
     [InlineData("$$public delegate void X();")]
     [InlineData("$$public interface X { }")]
-    public Task ToStringRefactoring_DoesNotAppear_NotRecord(string input) =>
-    Verify.VerifyRefactoringAsync(input, input);
+    public async Task ToStringRefactoring_DoesNotAppear_NotRecord(string input) =>
+    await Verify.VerifyRefactoringAsync(input, input);
 
     [Fact]
-    public Task ToStringRefactoring_DoesNotAppear_ToStringAlreadyPresent()
+    public async Task ToStringRefactoring_DoesNotAppear_ToStringAlreadyPresent()
     {
         var input = """
         using System;
@@ -30,7 +30,7 @@ public class ToStringTests
             throw new NotImplementedException();
         }
         """;
-        return Verify.VerifyRefactoringAsync(input, input);
+        await Verify.VerifyRefactoringAsync(input, input);
     }
 
     [Theory]
@@ -74,8 +74,8 @@ public class ToStringTests
     [InlineData("""
     public record Test($$int X, int Y, int Z);
     """)]
-    public Task ToStringRefactoring_DoesNotAppear_CursorInMembers(string input) =>
-        Verify.VerifyRefactoringAsync(input, input);
+    public async Task ToStringRefactoring_DoesNotAppear_CursorInMembers(string input) =>
+        await Verify.VerifyRefactoringAsync(input, input);
 
     [Theory]
     [InlineData("""
@@ -134,7 +134,7 @@ public class ToStringTests
     [|    |]
     }
     """)]
-    public Task ToStringRefactoring_GeneratesToString_CursorOnTypeAndNoMembers(string input)
+    public async Task ToStringRefactoring_GeneratesToString_CursorOnTypeAndNoMembers(string input)
     {
         var output = """
         using System.Text;
@@ -158,7 +158,7 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -234,7 +234,7 @@ public class ToStringTests
     $$
     }
     """)]
-    public Task ToStringRefactoring_GeneratesToString_CursorOnTypeAndOneMemberPresent(string input)
+    public async Task ToStringRefactoring_GeneratesToString_CursorOnTypeAndOneMemberPresent(string input)
     {
         var output = """
         using System.Text;
@@ -262,7 +262,7 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -365,7 +365,7 @@ public class ToStringTests
     $$
     }
     """)]
-    public Task ToStringRefactoring_GeneratesToString_CursorOnTypeAndTwoMembersPresent(string input)
+    public async Task ToStringRefactoring_GeneratesToString_CursorOnTypeAndTwoMembersPresent(string input)
     {
         var output = """
         using System.Text;
@@ -395,14 +395,14 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
     [InlineData("public string ToString(int x)")]
     [InlineData("public string ToString(ref int x)")]
     [InlineData("public string ToString(int x, int y)")]
-    public Task ToStringRefactoring_GeneratesMethod_OtherToStringOverloadsPresent(string overload)
+    public async Task ToStringRefactoring_GeneratesMethod_OtherToStringOverloadsPresent(string overload)
     {
         var input = $$"""
         using System;
@@ -445,11 +445,11 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task ToStringRefactoring_GeneratesToStringInInnerType_RecordsNestedAndCursorOnNestedType()
+    public async Task ToStringRefactoring_GeneratesToStringInInnerType_RecordsNestedAndCursorOnNestedType()
     {
         var input = """
         public record Outer
@@ -487,11 +487,11 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task ToStringRefactoring_GeneratesToStringInOuterType_RecordsNestedAndCursorBeforeNestedType()
+    public async Task ToStringRefactoring_GeneratesToStringInOuterType_RecordsNestedAndCursorBeforeNestedType()
     {
         var input = """
         public record Outer
@@ -530,11 +530,11 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task ToStringRefactoring_GeneratesToString_NoToStringAndRecordPositional()
+    public async Task ToStringRefactoring_GeneratesToString_NoToStringAndRecordPositional()
     {
         var input = """
                 $$public record Test(int Prop);
@@ -562,11 +562,11 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task ToStringRefactoring_GeneratesReadonlyToString_RecordStructWithNoMembers()
+    public async Task ToStringRefactoring_GeneratesReadonlyToString_RecordStructWithNoMembers()
     {
         var input = """
         $$public record struct Test
@@ -596,11 +596,11 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task ToStringRefactoring_GeneratesReadonlyToString_RecordStructWithReadonlyMembers()
+    public async Task ToStringRefactoring_GeneratesReadonlyToString_RecordStructWithReadonlyMembers()
     {
         var input = """
         $$public record struct Test
@@ -633,11 +633,11 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task ToStringRefactoring_GeneratesNonReadonlyToString_RecordStructWithNonReadonlyMembers()
+    public async Task ToStringRefactoring_GeneratesNonReadonlyToString_RecordStructWithNonReadonlyMembers()
     {
         var input = """
         $$public record struct Test
@@ -670,11 +670,11 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task ToStringRefactoring_GeneratesNonReadonlyToString_RecordStructWithNonReadonlyAndReadonlyMembers()
+    public async Task ToStringRefactoring_GeneratesNonReadonlyToString_RecordStructWithNonReadonlyAndReadonlyMembers()
     {
         var input = """
         $$public record struct Test
@@ -711,6 +711,6 @@ public class ToStringTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 }

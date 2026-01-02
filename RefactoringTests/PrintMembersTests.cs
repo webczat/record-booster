@@ -15,11 +15,11 @@ public class PrintMembersTests
     [InlineData("$$public struct X { }")]
     [InlineData("$$public delegate void X();")]
     [InlineData("$$public interface X { }")]
-    public Task PrintMembersRefactoring_DoesNotAppear_NotRecord(string input) =>
-    Verify.VerifyRefactoringAsync(input, input);
+    public async Task PrintMembersRefactoring_DoesNotAppear_NotRecord(string input) =>
+    await Verify.VerifyRefactoringAsync(input, input);
 
     [Fact]
-    public Task PrintMembersRefactoring_DoesNotAppear_PrintMembersAlreadyPresent()
+    public async Task PrintMembersRefactoring_DoesNotAppear_PrintMembersAlreadyPresent()
     {
         var input = """
         using System;
@@ -32,7 +32,7 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, input);
+        await Verify.VerifyRefactoringAsync(input, input);
     }
 
     [Theory]
@@ -66,8 +66,8 @@ public class PrintMembersTests
     [InlineData("""
     public record Test($$int I, int J, int K);
     """)]
-    public Task PrintMembersRefactoring_DoesNotAppear_CursorInMembers(string input) =>
-    Verify.VerifyRefactoringAsync(input, input);
+    public async Task PrintMembersRefactoring_DoesNotAppear_CursorInMembers(string input) =>
+    await Verify.VerifyRefactoringAsync(input, input);
 
     [Theory]
     [InlineData("""
@@ -126,7 +126,7 @@ public class PrintMembersTests
     [|    |]
     }
     """)]
-    public Task PrintMembersRefactoring_GeneratesMethodReturningFalse_CursorOnTypeAndNoMembers(string input)
+    public async Task PrintMembersRefactoring_GeneratesMethodReturningFalse_CursorOnTypeAndNoMembers(string input)
     {
         var output = """
         using System.Text;
@@ -140,11 +140,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodReturningFalse_NoPrintableMembers()
+    public async Task PrintMembersRefactoring_GeneratesMethodReturningFalse_NoPrintableMembers()
     {
         var input = """
         $$public record Test
@@ -179,7 +179,7 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -255,7 +255,7 @@ public class PrintMembersTests
     $$
     }
     """)]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_CursorOnTypeAndSinglePrintableMember(string input)
+    public async Task PrintMembersRefactoring_GeneratesMethodCorrectly_CursorOnTypeAndSinglePrintableMember(string input)
     {
         var output = """
         using System.Text;
@@ -276,7 +276,7 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -379,7 +379,7 @@ public class PrintMembersTests
     $$
     }
     """)]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_CursorOnTypeAndTwoPrintableMembers(string input)
+    public async Task PrintMembersRefactoring_GeneratesMethodCorrectly_CursorOnTypeAndTwoPrintableMembers(string input)
     {
         var output = """
         using System.Text;
@@ -405,7 +405,7 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -413,7 +413,7 @@ public class PrintMembersTests
     [InlineData("protected virtual bool PrintMembers(ref StringBuilder sb)")]
     [InlineData("protected virtual bool PrintMembers(string sb)")]
     [InlineData("protected virtual bool PrintMembers(StringBuilder sb, StringBuilder sb2)")]
-    public Task PrintMembersRefactoring_GeneratesMethod_OtherPrintMemberOverloadsPresent(string overload)
+    public async Task PrintMembersRefactoring_GeneratesMethod_OtherPrintMemberOverloadsPresent(string overload)
     {
         var input = $$"""
         using System;
@@ -446,11 +446,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodInInnerType_RecordsNestedAndCursorOnNestedType()
+    public async Task PrintMembersRefactoring_GeneratesMethodInInnerType_RecordsNestedAndCursorOnNestedType()
     {
         var input = """
         public record Outer
@@ -478,11 +478,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodInOuterType_RecordsNestedAndCursorBeforeNestedType()
+    public async Task PrintMembersRefactoring_GeneratesMethodInOuterType_RecordsNestedAndCursorBeforeNestedType()
     {
         var input = """
         public record Outer
@@ -511,11 +511,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_BothPrintableFieldsAndProperties()
+    public async Task PrintMembersRefactoring_GeneratesMethodCorrectly_BothPrintableFieldsAndProperties()
     {
         var input = """
         $$public record Test
@@ -546,11 +546,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_SkipsIndexer_IndexerGiven()
+    public async Task PrintMembersRefactoring_SkipsIndexer_IndexerGiven()
     {
         var input = """
         $$public record Test
@@ -578,11 +578,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_MixedPrintableAndNotPrintableMembers()
+    public async Task PrintMembersRefactoring_GeneratesMethodCorrectly_MixedPrintableAndNotPrintableMembers()
     {
         var input = """
         $$public record Test
@@ -610,11 +610,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodUsingToString_ValueTypeMembers()
+    public async Task PrintMembersRefactoring_GeneratesMethodUsingToString_ValueTypeMembers()
     {
         var input = """
         $$public record Test
@@ -645,11 +645,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_PositionalRecordWithParams()
+    public async Task PrintMembersRefactoring_GeneratesMethodCorrectly_PositionalRecordWithParams()
     {
         var input = """
         $$public record Test(string Prop);
@@ -670,11 +670,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_PositionalRecordWithParamsAndExplicitProperty()
+    public async Task PrintMembersRefactoring_GeneratesMethodCorrectly_PositionalRecordWithParamsAndExplicitProperty()
     {
         var input = """
         $$public record Test(string Prop)
@@ -700,11 +700,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesPrivateMethod_RecordSealed()
+    public async Task PrintMembersRefactoring_GeneratesPrivateMethod_RecordSealed()
     {
         var input = """
         $$public sealed record Test
@@ -725,11 +725,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCallingBase_InheritedAndNoMembers()
+    public async Task PrintMembersRefactoring_GeneratesMethodCallingBase_InheritedAndNoMembers()
     {
         var input = """
         public record Base
@@ -757,11 +757,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCallingBase_InheritedAndNoPrintableMembers()
+    public async Task PrintMembersRefactoring_GeneratesMethodCallingBase_InheritedAndNoPrintableMembers()
     {
         var input = """
         public record Base
@@ -802,11 +802,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_InheritedAndPrintableMembers()
+    public async Task PrintMembersRefactoring_GeneratesMethodCorrectly_InheritedAndPrintableMembers()
     {
         var input = """
         public record Base
@@ -849,11 +849,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_InheritedAndPositionalWithSingleParam()
+    public async Task PrintMembersRefactoring_GeneratesMethodCorrectly_InheritedAndPositionalWithSingleParam()
     {
         var input = """
         public record Base
@@ -888,11 +888,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesMethodCorrectly_InheritedAndPositionalWithSingleParamWithExplicitProperty()
+    public async Task PrintMembersRefactoring_GeneratesMethodCorrectly_InheritedAndPositionalWithSingleParamWithExplicitProperty()
     {
         var input = """
         public record Base
@@ -930,11 +930,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesProtectedOverrideMethod_InheritedAndSealed()
+    public async Task PrintMembersRefactoring_GeneratesProtectedOverrideMethod_InheritedAndSealed()
     {
         var input = """
         public record Base
@@ -962,11 +962,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesReadonlyMethod_RecordStructWithNoMembers()
+    public async Task PrintMembersRefactoring_GeneratesReadonlyMethod_RecordStructWithNoMembers()
     {
         var input = """
         $$public record struct Test
@@ -986,11 +986,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyProperties()
+    public async Task PrintMembersRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyProperties()
     {
         var input = """
         $$public record struct Test
@@ -1015,11 +1015,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyPropertiesAndNonReadonlyFields()
+    public async Task PrintMembersRefactoring_GeneratesReadonlyMethod_RecordStructWithReadonlyPropertiesAndNonReadonlyFields()
     {
         var input = """
         $$public record struct Test
@@ -1049,11 +1049,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesNonReadonlyMethod_RecordStructWithNonReadonlyProperties()
+    public async Task PrintMembersRefactoring_GeneratesNonReadonlyMethod_RecordStructWithNonReadonlyProperties()
     {
         var input = """
         $$public record struct Test
@@ -1078,11 +1078,11 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task PrintMembersRefactoring_GeneratesNonReadonlyMethod_RecordStructWithMixedReadonlyAndNonReadonlyProperties()
+    public async Task PrintMembersRefactoring_GeneratesNonReadonlyMethod_RecordStructWithMixedReadonlyAndNonReadonlyProperties()
     {
         var input = """
         $$public record struct Test
@@ -1112,6 +1112,6 @@ public class PrintMembersTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 }

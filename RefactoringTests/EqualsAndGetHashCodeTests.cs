@@ -17,11 +17,11 @@ public class EqualsAndGetHashCodeTests
     [InlineData("$$public struct X { }")]
     [InlineData("$$public delegate void X();")]
     [InlineData("$$public interface X { }")]
-    public Task EqualsAndGetHashCodeRefactoring_DoesNotAppear_NotRecord(string input) =>
-    Verify.VerifyRefactoringAsync(input, input);
+    public async Task EqualsAndGetHashCodeRefactoring_DoesNotAppear_NotRecord(string input) =>
+    await Verify.VerifyRefactoringAsync(input, input);
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_DoesNotAppear_EqualsAlreadyPresent()
+    public async Task EqualsAndGetHashCodeRefactoring_DoesNotAppear_EqualsAlreadyPresent()
     {
         var input = """
         using System;
@@ -32,11 +32,11 @@ public class EqualsAndGetHashCodeTests
                 throw new NotImplementedException();}
         """;
 
-        return Verify.VerifyRefactoringAsync(input, input);
+        await Verify.VerifyRefactoringAsync(input, input);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_DoesNotAppear_GetHashCodeAlreadyPresent()
+    public async Task EqualsAndGetHashCodeRefactoring_DoesNotAppear_GetHashCodeAlreadyPresent()
     {
         var input = """
         using System;
@@ -47,7 +47,7 @@ public class EqualsAndGetHashCodeTests
                 throw new NotImplementedException();}
         """;
 
-        return Verify.VerifyRefactoringAsync(input, input);
+        await Verify.VerifyRefactoringAsync(input, input);
     }
 
     [Theory]
@@ -81,8 +81,8 @@ public class EqualsAndGetHashCodeTests
     [InlineData("""
     public record Test($$int I, int J, int K);
     """)]
-    public Task EqualsAndGetHashCodeRefactoring_DoesNotAppear_CursorInMembers(string input) =>
-    Verify.VerifyRefactoringAsync(input, input);
+    public async Task EqualsAndGetHashCodeRefactoring_DoesNotAppear_CursorInMembers(string input) =>
+    await Verify.VerifyRefactoringAsync(input, input);
 
     [Theory]
     [InlineData("""
@@ -134,7 +134,7 @@ public class EqualsAndGetHashCodeTests
         
     }|]
     """)]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_CursorOnTypeAndNoMembers(string input)
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_CursorOnTypeAndNoMembers(string input)
     {
         var output = """
         using System;
@@ -154,7 +154,7 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -239,7 +239,7 @@ public class EqualsAndGetHashCodeTests
 
     }|]
     """)]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_CursorOnTypeAndOneMember(string input)
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_CursorOnTypeAndOneMember(string input)
     {
         var output = """
         using System;
@@ -266,7 +266,7 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -380,7 +380,7 @@ public class EqualsAndGetHashCodeTests
 
     }|]
     """)]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_CursorOnTypeAndTwoMembers(string input)
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_CursorOnTypeAndTwoMembers(string input)
     {
         var output = """
         using System;
@@ -411,7 +411,7 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -419,7 +419,7 @@ public class EqualsAndGetHashCodeTests
     [InlineData("public virtual bool Equals(int other)")]
     [InlineData("public virtual bool Equals(ref Test? other)")]
     [InlineData("public virtual bool Equals(Test? other, int x)")]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_OtherEqualsOverloadsPresent(string overload)
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_OtherEqualsOverloadsPresent(string overload)
     {
         var input = $$"""
         using System;
@@ -456,13 +456,13 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
     [InlineData("public int GetHashCode(int x)")]
     [InlineData("public int GetHashCode(ref int x)")]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_OtherGetHashCodeOverloadsPresent(string overload)
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_OtherGetHashCodeOverloadsPresent(string overload)
     {
         var input = $$"""
         using System;
@@ -499,11 +499,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethodsInInnerType_NestedRecordAndCursorOnInnerType()
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethodsInInnerType_NestedRecordAndCursorOnInnerType()
     {
         var input = """
         public record Outer
@@ -537,11 +537,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethodsInOuterType_NestedRecordAndCursorBeforeInnerType()
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethodsInOuterType_NestedRecordAndCursorBeforeInnerType()
     {
         var input = """
         public record Outer
@@ -576,11 +576,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethodsIgnoringFields_AllFieldsStatic()
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethodsIgnoringFields_AllFieldsStatic()
     {
         var input = """
         $$public record Test
@@ -609,11 +609,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesHashCodeCombine_SevenFields()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesHashCodeCombine_SevenFields()
     {
         var input = """
         $$public record Test
@@ -669,11 +669,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesHashCodeAdd_MoreThanSevenFields()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesHashCodeAdd_MoreThanSevenFields()
     {
         var input = """
         $$public record Test
@@ -734,7 +734,7 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
@@ -757,7 +757,7 @@ public class EqualsAndGetHashCodeTests
     [InlineData("nint")]
     [InlineData("System.Type")]
     [InlineData("System.DateTime")]
-    public Task EqualsAndGetHashCodeRefactoring_UsesEqualityOperator_BuiltinTypes(string typeName)
+    public async Task EqualsAndGetHashCodeRefactoring_UsesEqualityOperator_BuiltinTypes(string typeName)
     {
         var input = $$"""
         $$public record Test
@@ -789,11 +789,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesEqualityOperator_EnumTypes()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesEqualityOperator_EnumTypes()
     {
         var input = """
         public enum TestEnum
@@ -835,11 +835,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesEqualityOperator_RecordTypes()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesEqualityOperator_RecordTypes()
     {
         var input = """
         public record TestFieldType
@@ -879,13 +879,13 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Theory]
     [InlineData("string[]")]
     [InlineData("System.Text.StringBuilder")]
-    public Task EqualsAndGetHashCodeRefactoring_UsesDefaultEqualityComparer_OtherTypes(string typeName)
+    public async Task EqualsAndGetHashCodeRefactoring_UsesDefaultEqualityComparer_OtherTypes(string typeName)
     {
         var input = $$"""
         $$public record Test
@@ -918,11 +918,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_ReturnsEqualityContractHashCode_NoHashCodeStructAndNoMembers()
+    public async Task EqualsAndGetHashCodeRefactoring_ReturnsEqualityContractHashCode_NoHashCodeStructAndNoMembers()
     {
         var input = """
         $$public record Test
@@ -946,11 +946,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
+        await CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesValueTupleHashCode_NoHashCodeStructAndMembersPresent()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesValueTupleHashCode_NoHashCodeStructAndMembersPresent()
     {
         var input = """
         $$public record Test
@@ -980,11 +980,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
+        await CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_IgnoresProperties_PropertiesNotAuto()
+    public async Task EqualsAndGetHashCodeRefactoring_IgnoresProperties_PropertiesNotAuto()
     {
         var input = """
         $$public record Test
@@ -1013,11 +1013,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesProperties_PropertiesAuto()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesProperties_PropertiesAuto()
     {
         var input = """
         $$public record Test
@@ -1049,11 +1049,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesProperties_RecordPositional()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesProperties_RecordPositional()
     {
         var input = """
         $$public record Test(int Prop);
@@ -1080,11 +1080,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesPropertiesAndFields_MixedFieldsAndProperties()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesPropertiesAndFields_MixedFieldsAndProperties()
     {
         var input = """
         $$public record Test
@@ -1120,11 +1120,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesNonVirtualEquals_RecordSealed()
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesNonVirtualEquals_RecordSealed()
     {
         var input = """
         $$public sealed record Test
@@ -1150,11 +1150,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesNoOpMethods_RecordStructWithNoMembers()
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesNoOpMethods_RecordStructWithNoMembers()
     {
         var input = """
         $$public record struct Test
@@ -1177,11 +1177,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_RecordStructWithSingleMember()
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_RecordStructWithSingleMember()
     {
         var input = """
         $$public record struct Test
@@ -1209,11 +1209,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_RecordStructWithTwoMembers()
+    public async Task EqualsAndGetHashCodeRefactoring_GeneratesMethods_RecordStructWithTwoMembers()
     {
         var input = """
         $$public record struct Test
@@ -1246,11 +1246,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesHashCodeCombine_RecordStructWithEightMembers()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesHashCodeCombine_RecordStructWithEightMembers()
     {
         var input = """
         $$public record struct Test
@@ -1307,11 +1307,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesHashCodeAdd_RecordStructWithMoreThanEightMembers()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesHashCodeAdd_RecordStructWithMoreThanEightMembers()
     {
         var input = """
         $$public record struct Test
@@ -1373,11 +1373,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_ReturnsMemberHashCode_NoHashCodeStructAndRecordStructWithSingleMember()
+    public async Task EqualsAndGetHashCodeRefactoring_ReturnsMemberHashCode_NoHashCodeStructAndRecordStructWithSingleMember()
     {
         var input = """
         $$public record struct Test
@@ -1403,11 +1403,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
+        await CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesValueTupleHashCode_NoHashCodeStructAndRecordStructWithMultipleMembersPresent()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesValueTupleHashCode_NoHashCodeStructAndRecordStructWithMultipleMembersPresent()
     {
         var input = """
         $$public record struct Test
@@ -1438,11 +1438,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
+        await CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_DelegatesToBase_InheritedAndNoMembers()
+    public async Task EqualsAndGetHashCodeRefactoring_DelegatesToBase_InheritedAndNoMembers()
     {
         var input = """
         public record Base
@@ -1473,11 +1473,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_DelegatesToBase_InheritedAndSingleMember()
+    public async Task EqualsAndGetHashCodeRefactoring_DelegatesToBase_InheritedAndSingleMember()
     {
         var input = """
         public record Base
@@ -1516,11 +1516,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_ReturnsBaseHashCode_NoHashCodeStructAndInheritedWithNoMembers()
+    public async Task EqualsAndGetHashCodeRefactoring_ReturnsBaseHashCode_NoHashCodeStructAndInheritedWithNoMembers()
     {
         var input = """
         public record Base
@@ -1551,11 +1551,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
+        await CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesValueTupleHashCode_NoHashCodeStructAndInheritedWithMembersPresent()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesValueTupleHashCode_NoHashCodeStructAndInheritedWithMembersPresent()
     {
         var input = """
         public record Base
@@ -1592,11 +1592,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
+        await CodeRefactoringVerifier<RefactoringProvider, CSharpEqualsAndGetHashCodeNetStandardCodeRefactoringTest, DefaultVerifier>.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesHashCodeCombine_InheritedWithSevenFields()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesHashCodeCombine_InheritedWithSevenFields()
     {
         var input = """
         public record Base
@@ -1659,11 +1659,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesHashCodeAdd_InheritedAndMoreThanSevenFields()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesHashCodeAdd_InheritedAndMoreThanSevenFields()
     {
         var input = """
         public record Base
@@ -1731,11 +1731,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_RespectsNullableContext_NullableDisabled()
+    public async Task EqualsAndGetHashCodeRefactoring_RespectsNullableContext_NullableDisabled()
     {
         var input = """
         #nullable disable
@@ -1765,11 +1765,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_DoesNotAddUsings_UsingsPresent()
+    public async Task EqualsAndGetHashCodeRefactoring_DoesNotAddUsings_UsingsPresent()
     {
         var input = """
         using System;
@@ -1805,11 +1805,11 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 
     [Fact]
-    public Task EqualsAndGetHashCodeRefactoring_UsesEqualityComparer_GenericTypeParameters()
+    public async Task EqualsAndGetHashCodeRefactoring_UsesEqualityComparer_GenericTypeParameters()
     {
         var input = """
         $$public record Test<T>
@@ -1842,6 +1842,6 @@ public class EqualsAndGetHashCodeTests
         }
         """;
 
-        return Verify.VerifyRefactoringAsync(input, output);
+        await Verify.VerifyRefactoringAsync(input, output);
     }
 }
