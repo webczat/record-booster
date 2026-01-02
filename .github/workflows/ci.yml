@@ -41,7 +41,7 @@ jobs:
         with:
           updateProjectFiles: true
       - name: Build
-        run: dotnet build --no-restore -p:ContinuousIntegrationBuild=true
+        run: dotnet build --no-restore
       - name: Test
         run: dotnet test --no-build -- --results-directory test-results --report-xunit-trx
       - name: Publish test results as job summary
