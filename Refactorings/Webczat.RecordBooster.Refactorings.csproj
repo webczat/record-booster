@@ -6,6 +6,8 @@
         <Description>Record-booster - compiler refactorings for records</Description>
         <Authors>webczat</Authors>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>/README.md</PackageReadmeFile>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
         <DevelopmentDependency>true</DevelopmentDependency>
         <PackageProjectUrl>https://github.com/webczat/record-booster</PackageProjectUrl>
         <PackageTags>roslyn;refactorings;records;c#;dotnet</PackageTags>
@@ -26,6 +28,6 @@
     </ItemGroup>
     <ItemGroup>
         <None Include="bin\$(configuration)\$(TargetFramework)\$(assemblyName).dll" Pack="true"
-            PackagePath="analyzers\dotnet\cs\$(assemblyName).dll)" />
+            PackagePath="analyzers\dotnet\cs\$(assemblyName).dll" />
     </ItemGroup>
 </Project>

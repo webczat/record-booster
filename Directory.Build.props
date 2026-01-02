@@ -16,6 +16,8 @@
         <PackageReference Include="StyleCop.Analyzers" ExcludeAssets="compile" PrivateAssets="all" />
         <AdditionalFiles
             Include="$([MSBuild]::GetPathOfFileAbove('stylecop.json', $(MSBuildProjectDirectory)))" />
-        <SourceRoot Include="$(RepoRoot)" />
+        <None
+            Include="$([MSBuild]::GetPathOfFileAbove('README.md', $(MSBuildProjectDirectory)))"
+            PackagePath="/README.md" Pack="true" />
     </ItemGroup>
 </Project>
