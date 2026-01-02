@@ -26,3 +26,5 @@ jobs:
           cache: true
           cache-dependency-path: "**/packages.lock.json"
           source-url: github
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
