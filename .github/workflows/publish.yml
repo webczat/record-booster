@@ -23,7 +23,7 @@ jobs:
           name: test-results
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Publish test results
-        uses: dolby/test-reporter@v2.4.0
+        uses: dorny/test-reporter@v2.4.0
         with:
           name: Test results
           path: "**/test-results/*.trx"
