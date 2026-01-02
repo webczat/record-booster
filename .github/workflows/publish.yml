@@ -12,9 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(fromJSON('["failure", "success", "neutral"]'), github.event.workflow_run.conclusion)
     permissions:
-      checks: write
       contents: read
-      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
@@ -24,14 +22,23 @@ jobs:
           run-id: ${{github.event.workflow_run.id}}
           name: test-results
           github-token: ${{secrets.GITHUB_TOKEN}}
-      - name: Publish test results
+      - name: Create token for check writing
+        uses: actions/create-github-app-token@v2.2.1
+        id: token
+        with:
+          app-id: ${{vars.GH_APP_CLIENT_ID}}
+          private-key: ${{secrets.GH_APP_PRIVATE_KEY}}
+          permission-actions: read
+          permission-checks: write
+      - name: Publish test results as check suite
         uses: dorny/test-reporter@v2.4.0
         with:
           name: Test results
           path: "**/test-results/*.trx"
+          fail-on-error: false
           reporter: dotnet-trx
-          token: ${{secrets.GITHUB_TOKEN}}
-          use-actions-summary: "${{github.event.workflow_run.event != 'pull_request'}}"
+          token: ${{steps.token.outputs.token}}
+          use-actions-summary: false
 
   publish-packages:
     name: Publish packages

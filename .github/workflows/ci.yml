@@ -44,6 +44,14 @@ jobs:
         run: dotnet build --no-restore -p:ContinuousIntegrationBuild=true
       - name: Test
         run: dotnet test --no-build -- --results-directory test-results --report-xunit-trx
+      - name: Publish test results as job summary
+        if: "!cancelled()"
+        uses: dorny/test-reporter@v2.4.0
+        with:
+          name: Test results
+          path: "**/test-results/*.trx"
+          reporter: dotnet-trx
+          use-actions-summary: true
       - name: Package
         run: dotnet pack --no-restore -o packages -p:ContinuousIntegrationBuild=true
       - name: Upload packages
