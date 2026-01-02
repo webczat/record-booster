@@ -665,7 +665,7 @@ public class ToStringTests
                 }
 
                 sb.Append('}');
-                return sb.ToString()
+                return sb.ToString();
             }
         }
         """;
