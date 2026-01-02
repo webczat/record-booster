@@ -14,6 +14,7 @@ VERSION="$1"
 
 if [[ ! -f CHANGELOG.md ]]; then
     echo The changelog does not exist
+    exit 1
 fi
 
 DATE="$(date "+%Y-%m-%d")"
