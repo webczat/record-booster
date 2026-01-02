@@ -6,6 +6,7 @@
         <Description>Tests for RecordBooster</Description>
         <!-- Tests are not packable. -->
         <IsPackable>false</IsPackable>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     </PropertyGroup>
     <ItemGroup>
