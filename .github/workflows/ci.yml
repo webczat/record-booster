@@ -28,3 +28,9 @@ jobs:
           source-url: github
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Restore packages
+        run: dotnet restore
+      - name: Execute gitversion
+        uses: gittools/actions/gitversion/execute@v4.2.0
+        with:
+          updateProjectFiles: true
