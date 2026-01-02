@@ -31,6 +31,7 @@ jobs:
           path: "**/test-results/*.trx"
           reporter: dotnet-trx
           token: ${{secrets.GITHUB_TOKEN}}
+          use-actions-summary: "${{github.event.workflow_run.event != 'pull_request'}}"
 
   publish-packages:
     name: Publish packages
