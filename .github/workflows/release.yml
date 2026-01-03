@@ -1,0 +1,61 @@
+name: Perform release
+permissions: {}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release, defaults to current version on main without prerelease tag
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  perform-release:
+    name: Perform release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create token for release
+        uses: actions/create-github-app-token@v2.2.1
+        id: token
+        with:
+          app-id: ${{vars.GH_APP_CLIENT_ID}}
+          private-key: ${{secrets.GH_APP_PRIVATE_KEY}}
+          permission-contents: write
+      - name: Set up committer information
+        env:
+          APP_SLUG: "${{steps.token.outputs.app-slug}}"
+          GH_TOKEN: "${{steps.token.outputs.token}}"
+        run: |
+          set -e
+          USERNAME="${APP_SLUG}[bot]"
+          USERID="$(gh api "/users/${USERNAME}"" --jq .id)"
+          EMAIL="${USERID}+${USERNAME}@users.noreply.github.com"
+          echo username: $USERNAME
+          echo Email: $EMAIL
+          git config --global user.name "$USERNAME"
+          git config --global user.email "$EMAIL"
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+        with:
+          fetch-depth: 0
+          token: ${{steps.token.outputs.token}}
+          ref: main
+      - name: Setup gitversion
+        uses: gittools/actions/gitversion/setup@v4.2.0
+      - name: Execute gitversion
+        id: version
+        uses: gittools/actions/gitversion/execute@v4.2.0
+      - name: Fetch version to release
+        id: final_version
+        env:
+          VERSION: "${{inputs.version || steps.version.outputs.majorMinorPatch}}"
+        run: |
+          echo version: $VERSION
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Tag a release
+        env:
+          VERSION: "${{steps.final_version.outputs.version}}"
+        run: |
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
