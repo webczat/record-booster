@@ -1,0 +1,21 @@
+name: Delete old packages
+permissions: {}
+
+on:
+  schedule:
+    - cron: "0 0 0 0/1 * *"
+
+jobs:
+  delete-packages:
+    name: Delete old packages
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Perform deletion
+        uses: actions/delete-package-versions@v5.0.0
+        with:
+          min-versions-to-keep: 10
+          delete-only-pre-release-versions: true
+          package-type: nuget
+          package-name: Webczat.RecordBooster.Refactorings
