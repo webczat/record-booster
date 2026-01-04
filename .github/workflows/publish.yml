@@ -80,6 +80,7 @@ jobs:
     permissions:
       contents: read
       attestations: write
+      id-token: write
     env:
       RELEASE_NAME: ${{github.event.workflow_run.head_branch}}
     steps:
