@@ -14,7 +14,6 @@ jobs:
     permissions:
       contents: read
     steps:
-      - run: echo '${{toJSON(github.event.workflow_run.head_branch)}}'
       - name: Checkout
         uses: actions/checkout@v6.0.1
       - name: Download test results
@@ -68,3 +67,14 @@ jobs:
           for PKG in packages/*.nupkg; do
             dotnet nuget push --skip-duplicate -k "$TOKEN" $PKG
           done
+
+  publish-release:
+    runs-on: ubuntu-latest
+    needs:
+      - publish-test-results
+      - publish-packages
+    if: ${{github.event.workflow_run.event == 'push' && startsWith(github.event.workflow_run.head_branch, 'v')}}
+    env:
+      RELEASE_NAME: ${{github.event.workflow_run.head_branch}}
+    steps:
+      - run: echo Releasing $RELEASE_NAME
