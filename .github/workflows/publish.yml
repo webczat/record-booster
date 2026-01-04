@@ -84,6 +84,8 @@ jobs:
         run: echo "release_version=$(echo "$RELEASE_NAME" | sed -e "s/v//")" >> $GITHUB_OUTPUT
       - name: Checkout
         uses: actions/checkout@v6.0.1
+        with:
+          ref: ${{github.event.workflow_run.head_branch}}
       - name: Setup .NET sdk
         uses: actions/setup-dotnet@v5.0.1
         with:
@@ -96,9 +98,28 @@ jobs:
           path: packages
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Extract release notes
-        uses: dahlia/submark@0.3.1
+        id: notes
+        env:
+          RELEASE_VERSION: ${{steps.version.outputs.release_version}}
+        run: |
+          gawk -v RELEASE_VERSION="$RELEASE_VERSION" '
+            BEGIN { RS="\r?\n"; print "release_notes<<EOF"}
+            !HEADING && $0 == ("# Version " RELEASE_VERSION) { HEADING=1; next}
+            HEADING && $0 ~ /^# +.*$/ { HEADING=0}
+            HEADING { print $0; }
+            END { print "EOF"}
+          ' CHANGELOG.md >> $GITHUB_OUTPUT
+      - name: Create token for release
+        uses: actions/create-github-app-token@v2.2.1
+        id: token
         with:
-          heading-level: 1
-          heading-title-text: "Version ${{steps.version.outputs.release_version}}"
-          ignore-case: true
-          input-file: CHANGELOG.md
+          app-id: ${{vars.GH_APP_CLIENT_ID}}
+          private-key: ${{secrets.GH_APP_PRIVATE_KEY}}
+          permission-contents: write
+      - name: Create release
+        env:
+          GH_TOKEN: ${{steps.token.outputs.token}}
+          RELEASE_VERSION: ${{steps.version.outputs.release_version}}
+          RELEASE_NOTES: ${{steps.notes.outputs.release_notes}}
+          PRERELEASE: ${{contains(steps.version.outputs.release_version, '-')}}
+        run: gh release create --verify-tag "$RELEASE_VERSION" --notes "$RELEASE_NOTES" --prerelease="$PRERELEASE"
