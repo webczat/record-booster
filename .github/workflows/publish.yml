@@ -73,8 +73,32 @@ jobs:
     needs:
       - publish-test-results
       - publish-packages
-    if: ${{github.event.workflow_run.event == 'push' && startsWith(github.event.workflow_run.head_branch, 'v')}}
+    if: ${{contains(fromJSON('["success", "neutral"]'), github.event.workflow_run.conclusion) && github.event.workflow_run.event == 'push' && startsWith(github.event.workflow_run.head_branch, 'v')}}
+    permissions:
+      contents: read
     env:
       RELEASE_NAME: ${{github.event.workflow_run.head_branch}}
     steps:
-      - run: echo Releasing $RELEASE_NAME
+      - name: Extract version
+        id: version
+        run: echo "release_version=$(echo "$RELEASE_NAME" | sed -e "s/v//")" >> $GITHUB_OUTPUT
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+      - name: Setup .NET sdk
+        uses: actions/setup-dotnet@v5.0.1
+        with:
+          dotnet-version: 8.0.x
+      - name: Download packages
+        uses: actions/download-artifact@v7.0.0
+        with:
+          run-id: ${{github.event.workflow_run.id}}
+          name: packages
+          path: packages
+          github-token: ${{secrets.GITHUB_TOKEN}}
+      - name: Extract release notes
+        uses: dahlia/submark@0.3.1
+        with:
+          heading-level: 1
+          heading-title-text: "Version ${{steps.version.outputs.release_version}}"
+          ignore-case: true
+          input-file: CHANGELOG.md
