@@ -34,7 +34,7 @@ jobs:
           permission-actions: read
           permission-checks: write
       - name: Publish test results as check suite
-        uses: dorny/test-reporter@v2.4.0
+        uses: dorny/test-reporter@v2.5.0
         with:
           name: Test results
           path: "**/test-results/*.trx"
