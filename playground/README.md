@@ -1,6 +1,6 @@
 # Introduction
 This is an empty sample project.
-You can use it to exercise the refactorings, as it references the refactorings project.
+You can use it to exercise the plugins in this repository, as it references the plugin projects.
 
 # Usage
 Just create any .cs file. For example:
