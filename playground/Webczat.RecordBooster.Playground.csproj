@@ -2,7 +2,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net8.0</TargetFramework>
-        <RootNamespace>Webczat.RecordBooster.Sample</RootNamespace>
+        <RootNamespace>Webczat.RecordBooster.Playground</RootNamespace>
         <Description>Sample project to test refactorings</Description>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
