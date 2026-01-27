@@ -15,7 +15,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
         with:
           ref: ${{github.event.workflow_run.head_sha}}
           repository: ${{github.event.workflow_run.head_repository.owner.login}}/${{github.event.workflow_run.head_repository.name}}
@@ -51,7 +51,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Setup .NET sdk
         uses: actions/setup-dotnet@v5.1.0
         with:
@@ -88,7 +88,7 @@ jobs:
         id: version
         run: echo "release_version=$(echo "$RELEASE_NAME" | sed -e "s/v//")" >> $GITHUB_OUTPUT
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
         with:
           ref: ${{github.event.workflow_run.head_sha}}
       - name: Setup .NET sdk
