@@ -24,7 +24,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup gitversion
-        uses: gittools/actions/gitversion/setup@v4.2.0
+        uses: gittools/actions/gitversion/setup@v4.3.0
       - name: Setup .NET sdk
         uses: actions/setup-dotnet@v5.1.0
         with:
@@ -40,7 +40,7 @@ jobs:
         run: dotnet format --verify-no-changes --no-restore
       - name: Execute gitversion
         id: version
-        uses: gittools/actions/gitversion/execute@v4.2.0
+        uses: gittools/actions/gitversion/execute@v4.3.0
         with:
           updateProjectFiles: true
       - name: Build
