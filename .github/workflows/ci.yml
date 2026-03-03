@@ -58,13 +58,13 @@ jobs:
       - name: Package
         run: dotnet pack --no-restore -o packages -p:ContinuousIntegrationBuild=true
       - name: Upload packages
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: packages
           path: packages/*.nupkg
       - name: Upload test results
         if: "!cancelled()"
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: test-results
           path: "**/test-results/*"
