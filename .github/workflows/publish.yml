@@ -34,7 +34,7 @@ jobs:
           permission-actions: read
           permission-checks: write
       - name: Publish test results as check suite
-        uses: dorny/test-reporter@v2.5.0
+        uses: dorny/test-reporter@v2.6.0
         with:
           name: Test results
           path: "**/test-results/*.trx"
@@ -53,7 +53,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
       - name: Setup .NET sdk
-        uses: actions/setup-dotnet@v5.1.0
+        uses: actions/setup-dotnet@v5.2.0
         with:
           dotnet-version: 8.0.x
       - name: Download packages
@@ -92,7 +92,7 @@ jobs:
         with:
           ref: ${{github.event.workflow_run.head_sha}}
       - name: Setup .NET sdk
-        uses: actions/setup-dotnet@v5.1.0
+        uses: actions/setup-dotnet@v5.2.0
         with:
           dotnet-version: 8.0.x
       - name: Download packages
