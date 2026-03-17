@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create token for release
-        uses: actions/create-github-app-token@v2.2.1
+        uses: actions/create-github-app-token@v3.0.0
         id: token
         with:
           app-id: ${{vars.GH_APP_CLIENT_ID}}
@@ -42,10 +42,10 @@ jobs:
           token: ${{steps.token.outputs.token}}
           ref: main
       - name: Setup gitversion
-        uses: gittools/actions/gitversion/setup@v4.3.3
+        uses: gittools/actions/gitversion/setup@v4.4.2
       - name: Execute gitversion
         id: version
-        uses: gittools/actions/gitversion/execute@v4.3.3
+        uses: gittools/actions/gitversion/execute@v4.4.2
       - name: Fetch version to release
         id: final_version
         env:
