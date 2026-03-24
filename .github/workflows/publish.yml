@@ -34,7 +34,7 @@ jobs:
           permission-actions: read
           permission-checks: write
       - name: Publish test results as check suite
-        uses: dorny/test-reporter@v2.6.0
+        uses: dorny/test-reporter@v3.0.0
         with:
           name: Test results
           path: "**/test-results/*.trx"
@@ -106,7 +106,7 @@ jobs:
         id: sbom
         uses: advanced-security/generate-sbom-action@v1.1
       - name: Attest artifacts
-        uses: actions/attest-sbom@v4.0.0
+        uses: actions/attest-sbom@v4.1.0
         with:
           subject-path: packages/*.nupkg
           sbom-path: ${{steps.sbom.outputs.fileName}}
