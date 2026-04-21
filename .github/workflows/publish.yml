@@ -26,7 +26,7 @@ jobs:
           name: test-results
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Create token for check writing
-        uses: actions/create-github-app-token@v3.0.0
+        uses: actions/create-github-app-token@v3.1.1
         id: token
         with:
           app-id: ${{vars.GH_APP_CLIENT_ID}}
@@ -123,7 +123,7 @@ jobs:
             END { print "EOF"}
           ' CHANGELOG.md >> $GITHUB_OUTPUT
       - name: Create token for release
-        uses: actions/create-github-app-token@v3.0.0
+        uses: actions/create-github-app-token@v3.1.1
         id: token
         with:
           app-id: ${{vars.GH_APP_CLIENT_ID}}
