@@ -36,16 +36,16 @@ jobs:
           git config --global user.name "$USERNAME"
           git config --global user.email "$EMAIL"
       - name: Checkout
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
         with:
           fetch-depth: 0
           token: ${{steps.token.outputs.token}}
           ref: main
       - name: Setup gitversion
-        uses: gittools/actions/gitversion/setup@v4.5.0
+        uses: gittools/actions/gitversion/setup@v4.7.0
       - name: Execute gitversion
         id: version
-        uses: gittools/actions/gitversion/execute@v4.5.0
+        uses: gittools/actions/gitversion/execute@v4.7.0
       - name: Fetch version to release
         id: final_version
         env:

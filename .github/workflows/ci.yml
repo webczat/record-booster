@@ -20,13 +20,13 @@ jobs:
       packages: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
         with:
           fetch-depth: 0
       - name: Setup gitversion
-        uses: gittools/actions/gitversion/setup@v4.5.0
+        uses: gittools/actions/gitversion/setup@v4.7.0
       - name: Setup .NET sdk
-        uses: actions/setup-dotnet@v5.3.0
+        uses: actions/setup-dotnet@v5.4.0
         with:
           dotnet-version: 8.0.x
           cache: true
@@ -40,7 +40,7 @@ jobs:
         run: dotnet format --verify-no-changes --no-restore
       - name: Execute gitversion
         id: version
-        uses: gittools/actions/gitversion/execute@v4.5.0
+        uses: gittools/actions/gitversion/execute@v4.7.0
         with:
           updateProjectFiles: true
       - name: Build
