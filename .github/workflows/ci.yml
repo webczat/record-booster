@@ -20,13 +20,13 @@ jobs:
       packages: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: Setup gitversion
         uses: gittools/actions/gitversion/setup@v4.7.0
       - name: Setup .NET sdk
-        uses: actions/setup-dotnet@v5.4.0
+        uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: 8.0.x
           cache: true
